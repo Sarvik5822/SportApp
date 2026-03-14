@@ -1,0 +1,166 @@
+export const MOCK_INCIDENTS = [
+    {
+        _id: 'inc1',
+        title: 'Ankle Sprain During Practice',
+        description: 'Member twisted their ankle while performing a lateral drill during the basketball session. The court was slightly wet near the entrance area.',
+        type: 'injury',
+        severity: 'medium',
+        status: 'resolved',
+        incidentDate: '2026-03-10T14:30:00Z',
+        location: 'Main Court',
+        actionsTaken: 'Applied ice pack immediately, member rested for 15 minutes. Advised to see a doctor if swelling persists. Cleaned the wet area on the court.',
+        reportedBy: { name: 'Coach Smith', email: 'coach@test.com' },
+        involvedMembers: [
+            { _id: 'm1', name: 'John Smith', email: 'john@test.com' },
+        ],
+        resolvedDate: '2026-03-11T10:00:00Z',
+        createdAt: '2026-03-10T15:00:00Z',
+        updatedAt: '2026-03-11T10:00:00Z',
+    },
+    {
+        _id: 'inc2',
+        title: 'Broken Treadmill Belt',
+        description: 'The treadmill belt in station #3 snapped during use. Member was jogging at moderate speed when the belt suddenly stopped.',
+        type: 'equipment',
+        severity: 'high',
+        status: 'investigating',
+        incidentDate: '2026-03-12T09:15:00Z',
+        location: 'Gym Floor',
+        actionsTaken: 'Treadmill taken out of service immediately. Maintenance team notified. Member was uninjured but shaken.',
+        reportedBy: { name: 'Coach Smith', email: 'coach@test.com' },
+        involvedMembers: [
+            { _id: 'm2', name: 'Emily Davis', email: 'emily@test.com' },
+        ],
+        resolvedDate: null,
+        createdAt: '2026-03-12T09:30:00Z',
+        updatedAt: '2026-03-12T09:30:00Z',
+    },
+    {
+        _id: 'inc3',
+        title: 'Wet Floor Near Pool Area',
+        description: 'Excessive water pooling near the pool entrance creating a slip hazard. Multiple members reported near-miss incidents.',
+        type: 'safety',
+        severity: 'high',
+        status: 'open',
+        incidentDate: '2026-03-13T08:00:00Z',
+        location: 'Swimming Pool',
+        actionsTaken: 'Placed wet floor signs. Requested additional drainage mats from management.',
+        reportedBy: { name: 'Coach Smith', email: 'coach@test.com' },
+        involvedMembers: [],
+        resolvedDate: null,
+        createdAt: '2026-03-13T08:15:00Z',
+        updatedAt: '2026-03-13T08:15:00Z',
+    },
+    {
+        _id: 'inc4',
+        title: 'Member Altercation During Match',
+        description: 'Two members got into a heated verbal argument during a friendly football match that nearly escalated to physical confrontation.',
+        type: 'behavior',
+        severity: 'medium',
+        status: 'resolved',
+        incidentDate: '2026-03-08T16:45:00Z',
+        location: 'Football Field',
+        actionsTaken: 'Separated both members immediately. Had individual conversations with each. Both apologized and agreed to maintain sportsmanship.',
+        reportedBy: { name: 'Coach Smith', email: 'coach@test.com' },
+        involvedMembers: [
+            { _id: 'm3', name: 'David Martinez', email: 'david@test.com' },
+            { _id: 'm4', name: 'Michael Brown', email: 'michael@test.com' },
+        ],
+        resolvedDate: '2026-03-08T17:30:00Z',
+        createdAt: '2026-03-08T17:00:00Z',
+        updatedAt: '2026-03-08T17:30:00Z',
+    },
+    {
+        _id: 'inc5',
+        title: 'Minor Cut from Equipment',
+        description: 'Member got a small cut on their hand from a rough edge on the weight rack while re-racking dumbbells.',
+        type: 'injury',
+        severity: 'low',
+        status: 'closed',
+        incidentDate: '2026-03-05T11:20:00Z',
+        location: 'Weight Room',
+        actionsTaken: 'Administered first aid (cleaned wound, applied bandage). Filed maintenance request to smooth the rough edge on the rack.',
+        reportedBy: { name: 'Coach Smith', email: 'coach@test.com' },
+        involvedMembers: [
+            { _id: 'm5', name: 'Jessica Wilson', email: 'jessica@test.com' },
+        ],
+        resolvedDate: '2026-03-05T11:45:00Z',
+        createdAt: '2026-03-05T11:30:00Z',
+        updatedAt: '2026-03-06T09:00:00Z',
+    },
+    {
+        _id: 'inc6',
+        title: 'Dehydration During Outdoor Training',
+        description: 'A member experienced dizziness and mild dehydration symptoms during an outdoor running session in warm weather.',
+        type: 'injury',
+        severity: 'critical',
+        status: 'resolved',
+        incidentDate: '2026-03-02T15:00:00Z',
+        location: 'Outdoor Track',
+        actionsTaken: 'Moved member to shade immediately. Provided water and electrolyte drink. Monitored for 30 minutes. Member recovered fully. Updated outdoor training guidelines to include mandatory water breaks.',
+        reportedBy: { name: 'Coach Smith', email: 'coach@test.com' },
+        involvedMembers: [
+            { _id: 'm1', name: 'John Smith', email: 'john@test.com' },
+        ],
+        resolvedDate: '2026-03-02T16:00:00Z',
+        createdAt: '2026-03-02T15:15:00Z',
+        updatedAt: '2026-03-02T16:00:00Z',
+    },
+];
+
+export const MOCK_INCIDENT_STATS = {
+    total: 6,
+    open: 1,
+    investigating: 1,
+    resolved: 3,
+    closed: 1,
+    bySeverity: [
+        { severity: 'low', count: 1 },
+        { severity: 'medium', count: 2 },
+        { severity: 'high', count: 2 },
+        { severity: 'critical', count: 1 },
+    ],
+};
+
+export const MOCK_FACILITIES = [
+    { _id: 'f1', name: 'Main Court' },
+    { _id: 'f2', name: 'Gym Floor' },
+    { _id: 'f3', name: 'Swimming Pool' },
+    { _id: 'f4', name: 'Football Field' },
+    { _id: 'f5', name: 'Weight Room' },
+    { _id: 'f6', name: 'Outdoor Track' },
+    { _id: 'f7', name: 'Yoga Studio' },
+];
+
+export const MOCK_MEMBERS_LIST = [
+    { _id: 'm1', name: 'John Smith', email: 'john@test.com' },
+    { _id: 'm2', name: 'Emily Davis', email: 'emily@test.com' },
+    { _id: 'm3', name: 'David Martinez', email: 'david@test.com' },
+    { _id: 'm4', name: 'Michael Brown', email: 'michael@test.com' },
+    { _id: 'm5', name: 'Jessica Wilson', email: 'jessica@test.com' },
+    { _id: 'm6', name: 'Sarah Johnson', email: 'sarah@test.com' },
+    { _id: 'm7', name: 'Robert Lee', email: 'robert@test.com' },
+    { _id: 'm8', name: 'Amanda Taylor', email: 'amanda@test.com' },
+];
+
+export const SEVERITY_OPTIONS = [
+    { value: 'low', label: 'Low' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'high', label: 'High' },
+    { value: 'critical', label: 'Critical' },
+];
+
+export const STATUS_OPTIONS = [
+    { value: 'open', label: 'Open' },
+    { value: 'investigating', label: 'Investigating' },
+    { value: 'resolved', label: 'Resolved' },
+    { value: 'closed', label: 'Closed' },
+];
+
+export const TYPE_OPTIONS = [
+    { value: 'injury', label: 'Injury' },
+    { value: 'equipment', label: 'Equipment Issue' },
+    { value: 'safety', label: 'Safety' },
+    { value: 'behavior', label: 'Behavioral' },
+    { value: 'other', label: 'Other' },
+];

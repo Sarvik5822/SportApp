@@ -1,0 +1,110 @@
+// Mock payments data for the Payments screen
+export const MOCK_PAYMENTS = [
+    {
+        _id: 'pay1',
+        description: 'Premium Membership - 6 Months',
+        type: 'membership',
+        amount: 2999,
+        status: 'paid',
+        method: 'Visa •••• 4242',
+        createdAt: '2026-03-01',
+        invoiceUrl: 'https://example.com/invoice/1',
+    },
+    {
+        _id: 'pay2',
+        description: 'Personal Training Session',
+        type: 'session',
+        amount: 499,
+        status: 'paid',
+        method: 'Visa •••• 4242',
+        createdAt: '2026-02-20',
+        invoiceUrl: 'https://example.com/invoice/2',
+    },
+    {
+        _id: 'pay3',
+        description: 'Gym Equipment Rental',
+        type: 'rental',
+        amount: 250,
+        status: 'pending',
+        method: null,
+        createdAt: '2026-02-15',
+        invoiceUrl: null,
+    },
+    {
+        _id: 'pay4',
+        description: 'Swimming Pool Access - Monthly',
+        type: 'facility',
+        amount: 799,
+        status: 'paid',
+        method: 'UPI',
+        createdAt: '2026-02-10',
+        invoiceUrl: 'https://example.com/invoice/4',
+    },
+    {
+        _id: 'pay5',
+        description: 'Boxing Class Package',
+        type: 'session',
+        amount: 1499,
+        status: 'paid',
+        method: 'Visa •••• 4242',
+        createdAt: '2026-01-25',
+        invoiceUrl: 'https://example.com/invoice/5',
+    },
+    {
+        _id: 'pay6',
+        description: 'Yoga Workshop Registration',
+        type: 'event',
+        amount: 350,
+        status: 'pending',
+        method: null,
+        createdAt: '2026-03-10',
+        invoiceUrl: null,
+    },
+    {
+        _id: 'pay7',
+        description: 'Locker Rental - Quarterly',
+        type: 'rental',
+        amount: 600,
+        status: 'failed',
+        method: 'Visa •••• 4242',
+        createdAt: '2026-01-05',
+        invoiceUrl: null,
+    },
+];
+
+export const MOCK_PAYMENT_METHODS = [
+    {
+        id: 'pm1',
+        type: 'card',
+        name: 'Visa ending in 4242',
+        expiry: '12/2026',
+        isDefault: true,
+    },
+];
+
+export const AVAILABLE_PAYMENT_METHODS = [
+    {
+        id: 'card',
+        name: 'Credit/Debit Card',
+        icon: 'credit-card',
+        description: 'Visa, Mastercard, Amex',
+    },
+    {
+        id: 'upi',
+        name: 'UPI',
+        icon: 'cellphone',
+        description: 'Google Pay, PhonePe, Paytm',
+    },
+    {
+        id: 'netbanking',
+        name: 'Net Banking',
+        icon: 'bank',
+        description: 'Pay via your bank account',
+    },
+    {
+        id: 'wallet',
+        name: 'Wallet',
+        icon: 'wallet',
+        description: 'Paytm, Amazon Pay, etc.',
+    },
+];

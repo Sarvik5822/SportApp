@@ -1,0 +1,68 @@
+export const sportsCategories = [
+    {
+        id: '1',
+        name: 'Aquatic',
+        icon: 'water',
+        color: '#3b82f6',
+        sports: [
+            { id: '1-1', name: 'Swimming', icon: 'swim', difficulty: 'Beginner to Advanced' },
+        ],
+    },
+    {
+        id: '2',
+        name: 'Martial Arts',
+        icon: 'sword',
+        color: '#ef4444',
+        sports: [
+            { id: '2-1', name: 'Karate', icon: 'karate', difficulty: 'All Levels' },
+            { id: '2-2', name: 'Taekwondo', icon: 'kick', difficulty: 'All Levels' },
+            { id: '2-3', name: 'Judo', icon: 'judo', difficulty: 'Intermediate' },
+            { id: '2-4', name: 'Kung Fu', icon: 'punch', difficulty: 'Advanced' },
+            { id: '2-5', name: 'Brazilian Jiu-Jitsu', icon: 'grappling', difficulty: 'Advanced' },
+            { id: '2-6', name: 'Aikido', icon: 'aikido', difficulty: 'Intermediate' },
+            { id: '2-7', name: 'Boxing', icon: 'boxing', difficulty: 'All Levels' },
+            { id: '2-8', name: 'Kickboxing', icon: 'kick', difficulty: 'Intermediate' },
+            { id: '2-9', name: 'Wrestling', icon: 'wrestling', difficulty: 'Advanced' },
+        ],
+    },
+    {
+        id: '3',
+        name: 'Racket Sports',
+        icon: 'tennis',
+        color: '#22c55e',
+        sports: [
+            { id: '3-1', name: 'Badminton', icon: 'badminton', difficulty: 'All Levels' },
+            { id: '3-2', name: 'Table Tennis', icon: 'pingpong', difficulty: 'All Levels' },
+            { id: '3-3', name: 'Squash', icon: 'squash', difficulty: 'Intermediate' },
+            { id: '3-4', name: 'Racquetball', icon: 'racquet', difficulty: 'Intermediate' },
+            { id: '3-5', name: 'Fencing', icon: 'fencing', difficulty: 'Advanced' },
+        ],
+    },
+    {
+        id: '4',
+        name: 'Strength & Fitness',
+        icon: 'dumbbell',
+        color: '#f59e0b',
+        sports: [
+            { id: '4-1', name: 'Weightlifting', icon: 'weight', difficulty: 'Intermediate' },
+            { id: '4-2', name: 'Powerlifting', icon: 'power', difficulty: 'Advanced' },
+            { id: '4-3', name: 'Bodybuilding', icon: 'muscle', difficulty: 'All Levels' },
+            { id: '4-4', name: 'Gymnastics', icon: 'gymnastics', difficulty: 'Advanced' },
+            { id: '4-5', name: 'Indoor Rock Climbing', icon: 'climbing', difficulty: 'Intermediate' },
+        ],
+    },
+    {
+        id: '5',
+        name: 'Precision & Mind Sports',
+        icon: 'target',
+        color: '#8b5cf6',
+        sports: [
+            { id: '5-1', name: 'Billiards', icon: 'billiard', difficulty: 'All Levels' },
+            { id: '5-2', name: 'Bowling', icon: 'bowling', difficulty: 'All Levels' },
+            { id: '5-3', name: 'Darts', icon: 'darts', difficulty: 'All Levels' },
+            { id: '5-4', name: 'Archery', icon: 'archery', difficulty: 'Intermediate' },
+            { id: '5-5', name: 'Indoor Shooting', icon: 'shooting', difficulty: 'Advanced' },
+            { id: '5-6', name: 'Chess', icon: 'chess', difficulty: 'All Levels' },
+        ],
+    },
+];

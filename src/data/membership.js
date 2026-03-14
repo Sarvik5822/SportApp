@@ -1,0 +1,92 @@
+// Mock membership data for the Membership screen
+export const MOCK_MEMBERSHIP = {
+    _id: 'm1',
+    status: 'active',
+    startDate: '2025-01-15',
+    endDate: '2026-01-15',
+    multiClubAccess: true,
+    branch: {
+        name: 'Downtown Fitness Hub',
+    },
+    plan: {
+        _id: 'p2',
+        name: 'Premium',
+        price: 2999,
+        duration: 6,
+        features: [
+            'Access to all gym equipment',
+            'Swimming pool access',
+            'Group fitness classes',
+            'Personal trainer (2 sessions/month)',
+            'Sauna & steam room',
+            'Free parking',
+        ],
+        sports: ['Gym', 'Swimming', 'Yoga', 'Boxing', 'Badminton'],
+    },
+};
+
+export const MOCK_PLANS = [
+    {
+        _id: 'p1',
+        name: 'Basic',
+        price: 999,
+        duration: 1,
+        popular: false,
+        multiClubAccess: false,
+        features: [
+            'Access to gym equipment',
+            'Locker room access',
+            'Basic fitness assessment',
+        ],
+        sports: ['Gym'],
+    },
+    {
+        _id: 'p2',
+        name: 'Premium',
+        price: 2999,
+        duration: 6,
+        popular: true,
+        multiClubAccess: true,
+        features: [
+            'Access to all gym equipment',
+            'Swimming pool access',
+            'Group fitness classes',
+            'Personal trainer (2 sessions/month)',
+            'Sauna & steam room',
+            'Free parking',
+        ],
+        sports: ['Gym', 'Swimming', 'Yoga', 'Boxing', 'Badminton'],
+    },
+    {
+        _id: 'p3',
+        name: 'Gold',
+        price: 4999,
+        duration: 12,
+        popular: false,
+        multiClubAccess: true,
+        features: [
+            'All Premium features',
+            'Unlimited personal training',
+            'Nutrition consultation',
+            'Priority booking',
+            'Guest passes (2/month)',
+            'Exclusive events access',
+            'Multi-club access',
+        ],
+        sports: ['Gym', 'Swimming', 'Yoga', 'Boxing', 'Badminton', 'Tennis', 'Karate'],
+    },
+    {
+        _id: 'p4',
+        name: 'Student',
+        price: 599,
+        duration: 1,
+        popular: false,
+        multiClubAccess: false,
+        features: [
+            'Access to gym equipment',
+            'Group fitness classes',
+            'Student discount pricing',
+        ],
+        sports: ['Gym', 'Yoga'],
+    },
+];

@@ -1,0 +1,121 @@
+export const MOCK_ANNOUNCEMENTS = [
+    {
+        _id: 'ann1',
+        title: 'Club Annual Day Celebration 2026',
+        content:
+            'We are excited to announce our Annual Day Celebration on April 15, 2026! Join us for a day filled with sports competitions, cultural performances, and awards ceremony. All members and their families are welcome. Light refreshments will be provided. Please RSVP by April 10th through the club reception or this app.',
+        priority: 'high',
+        author: 'Club Admin',
+        targetAudience: ['all'],
+        publishDate: '2026-03-10',
+        createdAt: '2026-03-10T10:00:00Z',
+        expiryDate: '2026-04-15',
+        attachments: [
+            { filename: 'Annual_Day_Schedule.pdf', url: '#' },
+            { filename: 'RSVP_Form.pdf', url: '#' },
+        ],
+    },
+    {
+        _id: 'ann2',
+        title: 'Swimming Pool Maintenance Notice',
+        content:
+            'The swimming pool will be closed for maintenance from March 20 to March 25, 2026. During this period, members can use the partner facility at Westside Athletic Club. We apologize for the inconvenience and appreciate your understanding.',
+        priority: 'urgent',
+        author: 'Facility Manager',
+        targetAudience: ['swimmers'],
+        publishDate: '2026-03-08',
+        createdAt: '2026-03-08T14:30:00Z',
+        expiryDate: '2026-03-25',
+        attachments: [],
+    },
+    {
+        _id: 'ann3',
+        title: 'New Yoga Classes Starting This Month',
+        content:
+            'We are introducing new Yoga and Meditation classes every Monday, Wednesday, and Friday from 6:00 AM to 7:00 AM. Led by certified instructor Priya Sharma. Open to all members. No prior experience needed. Mats will be provided. Limited to 30 participants per session.',
+        priority: 'medium',
+        author: 'Sports Coordinator',
+        targetAudience: ['all'],
+        publishDate: '2026-03-05',
+        createdAt: '2026-03-05T09:00:00Z',
+        expiryDate: '2026-04-30',
+        attachments: [{ filename: 'Yoga_Class_Timetable.pdf', url: '#' }],
+    },
+    {
+        _id: 'ann4',
+        title: 'Membership Renewal Reminder',
+        content:
+            'This is a friendly reminder that membership renewals for Q2 2026 are now open. Early renewals before March 31st will receive a 10% discount. Visit the reception desk or renew through the Payments section in this app. Contact us for any queries.',
+        priority: 'medium',
+        author: 'Accounts Department',
+        targetAudience: ['members'],
+        publishDate: '2026-03-01',
+        createdAt: '2026-03-01T08:00:00Z',
+        expiryDate: '2026-03-31',
+        attachments: [],
+    },
+    {
+        _id: 'ann5',
+        title: 'Inter-Club Cricket Tournament Registration',
+        content:
+            'Registration is now open for the Inter-Club Cricket Tournament 2026! The tournament will be held from April 20-25 at the main ground. Teams of 11 players can register. Entry fee: ₹500 per team. Prizes worth ₹50,000 for winners. Last date to register: April 5, 2026.',
+        priority: 'low',
+        author: 'Sports Committee',
+        targetAudience: ['cricket'],
+        publishDate: '2026-02-28',
+        createdAt: '2026-02-28T11:00:00Z',
+        expiryDate: '2026-04-05',
+        attachments: [
+            { filename: 'Tournament_Rules.pdf', url: '#' },
+            { filename: 'Registration_Form.pdf', url: '#' },
+            { filename: '/images/Gym.jpg', url: '#' },
+        ],
+    },
+    {
+        _id: 'ann6',
+        title: 'Updated Gym Timings',
+        content:
+            'Effective from March 15, 2026, the gym timings have been updated as follows:\n\nMonday to Friday: 5:00 AM - 10:00 PM\nSaturday: 6:00 AM - 8:00 PM\nSunday: 7:00 AM - 6:00 PM\n\nPlease plan your workouts accordingly.',
+        priority: 'low',
+        author: 'Club Admin',
+        targetAudience: ['all'],
+        publishDate: '2026-02-25',
+        createdAt: '2026-02-25T16:00:00Z',
+        expiryDate: null,
+        attachments: [],
+    },
+    {
+        _id: 'ann7',
+        title: 'Health & Safety Guidelines Update',
+        content:
+            'We have updated our health and safety guidelines. Key changes include mandatory use of towels on gym equipment, sanitizing equipment after use, and wearing proper sports shoes in all indoor facilities. Please review the full guidelines attached below.',
+        priority: 'high',
+        author: 'Safety Officer',
+        targetAudience: ['all'],
+        publishDate: '2026-02-20',
+        createdAt: '2026-02-20T12:00:00Z',
+        expiryDate: null,
+        attachments: [{ filename: 'Safety_Guidelines_2026.pdf', url: '#' }],
+    },
+    {
+        _id: 'ann8',
+        title: 'Summer Camp for Kids - Registrations Open',
+        content:
+            'Our annual Summer Sports Camp for kids aged 6-16 is back! Running from May 1 to May 31, 2026. Activities include swimming, cricket, football, badminton, and art & craft. Early bird discount of 15% for registrations before April 15.',
+        priority: 'medium',
+        author: 'Youth Program Coordinator',
+        targetAudience: ['parents'],
+        publishDate: '2026-02-15',
+        createdAt: '2026-02-15T10:00:00Z',
+        expiryDate: '2026-04-30',
+        attachments: [{ filename: 'Summer_Camp_Brochure.pdf', url: '#' }],
+    },
+];
+
+export const ANNOUNCEMENT_PRIORITIES = [
+    { key: 'all', label: 'All' },
+    { key: 'urgent', label: 'Urgent' },
+    { key: 'high', label: 'High' },
+    { key: 'medium', label: 'Medium' },
+    { key: 'low', label: 'Low' },
+];
