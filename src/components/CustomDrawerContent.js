@@ -6,7 +6,6 @@ import {
     ScrollView,
     Alert,
 } from 'react-native';
-import { DrawerContentScrollView } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import ProfileAvatar from './ProfileAvatar';
