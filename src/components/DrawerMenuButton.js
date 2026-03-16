@@ -7,11 +7,14 @@ const DrawerMenuButton = ({ color = '#fff', size = 26 }) => {
     const navigation = useNavigation();
 
     const openDrawer = () => {
-        // Try to open the parent drawer
-        if (navigation.openDrawer) {
-            navigation.openDrawer();
-        } else if (navigation.getParent()?.openDrawer) {
-            navigation.getParent().openDrawer();
+        try {
+            if (navigation.openDrawer) {
+                navigation.openDrawer();
+            } else if (navigation.getParent && navigation.getParent()?.openDrawer) {
+                navigation.getParent().openDrawer();
+            }
+        } catch (e) {
+            console.warn('DrawerMenuButton: Could not open drawer', e);
         }
     };
 

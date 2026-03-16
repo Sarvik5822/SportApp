@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../components/CustomButton';
 
 const ROLES = [
@@ -29,7 +30,8 @@ const ROLE_DESTINATIONS = {
     coach: 'CoachDrawer',
 };
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
+    const navigation = useNavigation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
