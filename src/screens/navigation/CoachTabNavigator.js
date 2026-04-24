@@ -9,8 +9,6 @@ import SessionsScreen from '../coach/SessionsScreen';
 import CreateEditSessionScreen from '../coach/CreateEditSessionScreen';
 import AttendanceScreen from '../coach/AttendanceScreen';
 import CoachAttendanceScreen from '../coach/CoachAttendanceScreen';
-import TraineesScreen from '../coach/TraineesScreen';
-import TraineeProfileScreen from '../coach/TraineeProfileScreen';
 import MembersScreen from '../coach/MembersScreen';
 import MemberProfileScreen from '../coach/MemberProfileScreen';
 import CoachProfileScreen from '../coach/CoachProfileScreen';
@@ -23,13 +21,6 @@ const SessionsStack = () => (
     <Stack.Screen name="SessionsList" component={SessionsScreen} />
     <Stack.Screen name="CreateEditSession" component={CreateEditSessionScreen} />
     <Stack.Screen name="Attendance" component={AttendanceScreen} />
-  </Stack.Navigator>
-);
-
-const TraineesStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="TraineesList" component={TraineesScreen} />
-    <Stack.Screen name="TraineeProfile" component={TraineeProfileScreen} />
   </Stack.Navigator>
 );
 

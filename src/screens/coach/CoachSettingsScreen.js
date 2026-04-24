@@ -61,36 +61,70 @@ const mockCoachSettingsService = {
     },
 };
 
-// ─── Tab Button Component ───
+// ═══════════════════════════════════════════════
+// ─── ENHANCED TAB BUTTON (Dashboard Style) ───
+// ═══════════════════════════════════════════════
 const TabButton = ({ label, icon, isActive, onPress }) => (
     <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.7}
-        className={`flex-1 flex-row items-center justify-center py-3 rounded-xl ${isActive ? 'bg-blue-600' : 'bg-transparent'
-            }`}>
-        <Icon name={icon} size={18} color={isActive ? '#fff' : '#6b7280'} />
-        <Text
-            className={`ml-1.5 font-semibold text-sm ${isActive ? 'text-white' : 'text-gray-500'
-                }`}>
-            {label}
-        </Text>
+        className="flex-1 py-3 items-center rounded-xl"
+        style={{
+            backgroundColor: isActive ? undefined : 'transparent',
+            overflow: 'hidden',
+        }}>
+        {isActive ? (
+            <LinearGradient
+                colors={['#1e3a8a', '#3b82f6']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    borderRadius: 12,
+                }}
+            />
+        ) : null}
+        <View className="flex-row items-center">
+            <Icon
+                name={icon}
+                size={14}
+                color={isActive ? '#ffffff' : '#9ca3af'}
+                style={{ marginRight: 4 }}
+            />
+            <Text
+                className="text-xs font-bold"
+                style={{ color: isActive ? '#ffffff' : '#9ca3af' }}>
+                {label}
+            </Text>
+        </View>
     </TouchableOpacity>
 );
 
-// ─── Toggle Row Component ───
+// ═══════════════════════════════════════════════
+// ─── ENHANCED TOGGLE ROW ───
+// ═══════════════════════════════════════════════
 const ToggleRow = ({ icon, iconColor, title, description, value, onValueChange, disabled }) => (
     <View
-        className="flex-row items-center justify-between p-4 bg-white rounded-xl mb-3 shadow-sm"
-        style={{ elevation: 2 }}>
+        className="flex-row items-center justify-between p-4 bg-white rounded-2xl mb-3 shadow-sm"
+        style={{
+            elevation: 2,
+            borderLeftWidth: 3,
+            borderLeftColor: value ? iconColor : '#e5e7eb',
+        }}>
         <View className="flex-row items-center flex-1 mr-3">
-            <View
-                className="w-10 h-10 rounded-lg justify-center items-center"
-                style={{ backgroundColor: `${iconColor}15` }}>
+            <LinearGradient
+                colors={[`${iconColor}20`, `${iconColor}10`]}
+                className="w-11 h-11 rounded-xl justify-center items-center"
+                style={{ borderRadius: 12 }}>
                 <Icon name={icon} size={20} color={iconColor} />
-            </View>
-            <View className="ml-3 flex-1">
-                <Text className="text-gray-900 font-semibold text-sm">{title}</Text>
-                <Text className="text-gray-400 text-xs mt-0.5">{description}</Text>
+            </LinearGradient>
+            <View className="ml-3.5 flex-1">
+                <Text className="text-gray-900 font-bold text-sm">{title}</Text>
+                <Text className="text-gray-400 text-xs mt-0.5 leading-4">{description}</Text>
             </View>
         </View>
         <Switch
@@ -103,16 +137,20 @@ const ToggleRow = ({ icon, iconColor, title, description, value, onValueChange, 
     </View>
 );
 
-// ─── Section Card Component ───
+// ═══════════════════════════════════════════════
+// ─── ENHANCED SECTION CARD ───
+// ═══════════════════════════════════════════════
 const SectionCard = ({ title, icon, iconColor, children }) => (
-    <View className="bg-gray-50 rounded-2xl p-4 mb-4">
+    <View
+        className="bg-white rounded-2xl p-5 mb-4 shadow-md"
+        style={{ elevation: 3 }}>
         <View className="flex-row items-center mb-4">
             <View
-                className="w-9 h-9 rounded-lg justify-center items-center"
-                style={{ backgroundColor: `${iconColor}15` }}>
-                <Icon name={icon} size={20} color={iconColor} />
+                className="w-8 h-8 rounded-lg justify-center items-center mr-2.5"
+                style={{ backgroundColor: `${iconColor}12` }}>
+                <Icon name={icon} size={16} color={iconColor} />
             </View>
-            <Text className="text-gray-900 font-bold text-lg ml-2">{title}</Text>
+            <Text className="text-gray-900 font-bold text-lg">{title}</Text>
         </View>
         {children}
     </View>
@@ -124,14 +162,16 @@ const SkeletonLoader = ({ count = 3 }) => (
         {Array.from({ length: count }).map((_, i) => (
             <View
                 key={i}
-                className="bg-gray-200 rounded-xl h-16 mb-3"
-                style={{ opacity: 0.5 }}
+                className="bg-gray-100 rounded-2xl h-16 mb-3"
+                style={{ opacity: 0.6 }}
             />
         ))}
     </View>
 );
 
-// ─── Select Row Component (simulated dropdown) ───
+// ═══════════════════════════════════════════════
+// ─── ENHANCED SELECT ROW ───
+// ═══════════════════════════════════════════════
 const SelectRow = ({ icon, iconColor, label, value, options, onSelect }) => {
     const [expanded, setExpanded] = useState(false);
     const selectedOption = options.find(o => o.value === value);
@@ -141,29 +181,42 @@ const SelectRow = ({ icon, iconColor, label, value, options, onSelect }) => {
             <TouchableOpacity
                 onPress={() => setExpanded(!expanded)}
                 activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4 bg-white rounded-xl shadow-sm"
-                style={{ elevation: 2 }}>
+                className="flex-row items-center justify-between p-4 bg-white rounded-2xl shadow-sm"
+                style={{
+                    elevation: 2,
+                    borderLeftWidth: 3,
+                    borderLeftColor: iconColor,
+                }}>
                 <View className="flex-row items-center flex-1">
-                    <View
-                        className="w-10 h-10 rounded-lg justify-center items-center"
-                        style={{ backgroundColor: `${iconColor}15` }}>
+                    <LinearGradient
+                        colors={[`${iconColor}20`, `${iconColor}10`]}
+                        className="w-11 h-11 rounded-xl justify-center items-center"
+                        style={{ borderRadius: 12 }}>
                         <Icon name={icon} size={20} color={iconColor} />
-                    </View>
-                    <View className="ml-3 flex-1">
-                        <Text className="text-gray-400 text-xs">{label}</Text>
-                        <Text className="text-gray-900 font-semibold text-sm mt-0.5">
+                    </LinearGradient>
+                    <View className="ml-3.5 flex-1">
+                        <Text className="text-gray-400 text-[11px] font-semibold uppercase tracking-wider">
+                            {label}
+                        </Text>
+                        <Text className="text-gray-900 font-bold text-sm mt-0.5">
                             {selectedOption?.label || value}
                         </Text>
                     </View>
                 </View>
-                <Icon
-                    name={expanded ? 'chevron-up' : 'chevron-down'}
-                    size={20}
-                    color="#9ca3af"
-                />
+                <View
+                    className="w-8 h-8 rounded-full justify-center items-center"
+                    style={{ backgroundColor: expanded ? `${iconColor}15` : '#f3f4f6' }}>
+                    <Icon
+                        name={expanded ? 'chevron-up' : 'chevron-down'}
+                        size={18}
+                        color={expanded ? iconColor : '#9ca3af'}
+                    />
+                </View>
             </TouchableOpacity>
             {expanded && (
-                <View className="bg-white rounded-xl mt-1 overflow-hidden shadow-sm" style={{ elevation: 2 }}>
+                <View
+                    className="bg-white rounded-2xl mt-2 overflow-hidden shadow-md"
+                    style={{ elevation: 3 }}>
                     {options.map((option, index) => (
                         <TouchableOpacity
                             key={option.value}
@@ -172,17 +225,34 @@ const SelectRow = ({ icon, iconColor, label, value, options, onSelect }) => {
                                 setExpanded(false);
                             }}
                             activeOpacity={0.7}
-                            className={`flex-row items-center justify-between px-4 py-3 ${index < options.length - 1 ? 'border-b border-gray-100' : ''
-                                } ${option.value === value ? 'bg-blue-50' : ''}`}>
-                            <Text
-                                className={`text-sm ${option.value === value
-                                    ? 'text-blue-700 font-semibold'
-                                    : 'text-gray-700'
-                                    }`}>
-                                {option.label}
-                            </Text>
+                            className={`flex-row items-center justify-between px-5 py-3.5 ${index < options.length - 1 ? 'border-b border-gray-50' : ''
+                                }`}
+                            style={{
+                                backgroundColor: option.value === value ? `${iconColor}08` : 'transparent',
+                            }}>
+                            <View className="flex-row items-center">
+                                {option.value === value && (
+                                    <View
+                                        className="w-2 h-2 rounded-full mr-3"
+                                        style={{ backgroundColor: iconColor }}
+                                    />
+                                )}
+                                <Text
+                                    className={`text-sm ${option.value === value
+                                        ? 'font-bold'
+                                        : 'text-gray-600 font-medium'
+                                        }`}
+                                    style={option.value === value ? { color: iconColor } : undefined}>
+                                    {option.label}
+                                </Text>
+                            </View>
                             {option.value === value && (
-                                <Icon name="check" size={18} color="#1e3a8a" />
+                                <LinearGradient
+                                    colors={['#1e3a8a', '#3b82f6']}
+                                    className="w-6 h-6 rounded-full justify-center items-center"
+                                    style={{ borderRadius: 12 }}>
+                                    <Icon name="check" size={14} color="#fff" />
+                                </LinearGradient>
                             )}
                         </TouchableOpacity>
                     ))}
@@ -192,7 +262,9 @@ const SelectRow = ({ icon, iconColor, label, value, options, onSelect }) => {
     );
 };
 
-// ─── Main Coach Settings Screen ───
+// ═══════════════════════════════════════════════
+// ─── MAIN COACH SETTINGS SCREEN ───
+// ═══════════════════════════════════════════════
 const CoachSettingsScreen = ({ navigation }) => {
     const [activeTab, setActiveTab] = useState('notifications');
     const [loading, setLoading] = useState(true);
@@ -355,14 +427,22 @@ const CoachSettingsScreen = ({ navigation }) => {
         }
     };
 
-    // ─── Password Input Component ───
+    // ─── Enhanced Password Input Component ───
     const PasswordInput = ({ label, value, onChangeText, showPassword, toggleShow, placeholder }) => (
         <View className="mb-4">
-            <Text className="text-gray-700 font-medium text-sm mb-2">{label}</Text>
-            <View className="flex-row items-center bg-white rounded-xl border border-gray-200 px-4">
-                <Icon name="lock-outline" size={20} color="#9ca3af" />
+            <Text className="text-gray-400 text-[11px] mb-2 font-bold uppercase tracking-wider">
+                {label}
+            </Text>
+            <View
+                className="flex-row items-center bg-gray-50 rounded-xl border border-gray-200 px-4"
+                style={{ borderWidth: 1.5 }}>
+                <View
+                    className="w-8 h-8 rounded-lg justify-center items-center mr-2"
+                    style={{ backgroundColor: '#1e3a8a12' }}>
+                    <Icon name="lock-outline" size={16} color="#1e3a8a" />
+                </View>
                 <TextInput
-                    className="flex-1 py-3.5 px-3 text-gray-900 text-sm"
+                    className="flex-1 py-3.5 text-gray-900 text-sm font-medium"
                     secureTextEntry={!showPassword}
                     value={value}
                     onChangeText={onChangeText}
@@ -370,18 +450,24 @@ const CoachSettingsScreen = ({ navigation }) => {
                     placeholderTextColor="#d1d5db"
                     autoCapitalize="none"
                 />
-                <TouchableOpacity onPress={toggleShow} activeOpacity={0.7}>
+                <TouchableOpacity
+                    onPress={toggleShow}
+                    activeOpacity={0.7}
+                    className="w-8 h-8 rounded-full justify-center items-center"
+                    style={{ backgroundColor: '#f3f4f6' }}>
                     <Icon
                         name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                        size={20}
-                        color="#9ca3af"
+                        size={18}
+                        color="#6b7280"
                     />
                 </TouchableOpacity>
             </View>
         </View>
     );
 
-    // ─── Render Notifications Tab ───
+    // ═══════════════════════════════════════════════
+    // ─── RENDER NOTIFICATIONS TAB ───
+    // ═══════════════════════════════════════════════
     const renderNotificationsTab = () => (
         <View>
             {/* Notification Types */}
@@ -498,10 +584,19 @@ const CoachSettingsScreen = ({ navigation }) => {
                             onPress={handleSaveNotifications}
                             disabled={saving}
                             activeOpacity={0.8}
-                            className="mt-2">
+                            className="mt-3"
+                            style={{ borderRadius: 14, overflow: 'hidden' }}>
                             <LinearGradient
                                 colors={saving ? ['#d1d5db', '#d1d5db'] : ['#1e3a8a', '#3b82f6']}
-                                className="rounded-xl py-4 items-center flex-row justify-center">
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={{
+                                    borderRadius: 14,
+                                    paddingVertical: 14,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
                                 {saving && (
                                     <ActivityIndicator
                                         size="small"
@@ -509,7 +604,7 @@ const CoachSettingsScreen = ({ navigation }) => {
                                         style={{ marginRight: 8 }}
                                     />
                                 )}
-                                <Icon name="content-save-outline" size={20} color="#fff" />
+                                <Icon name="content-save-outline" size={18} color="#fff" />
                                 <Text className="text-white font-bold text-base ml-2">
                                     {saving ? 'Saving...' : 'Save Notification Settings'}
                                 </Text>
@@ -521,7 +616,9 @@ const CoachSettingsScreen = ({ navigation }) => {
         </View>
     );
 
-    // ─── Render Security Tab ───
+    // ═══════════════════════════════════════════════
+    // ─── RENDER SECURITY TAB ───
+    // ═══════════════════════════════════════════════
     const renderSecurityTab = () => (
         <View>
             {/* Change Password Section */}
@@ -563,10 +660,19 @@ const CoachSettingsScreen = ({ navigation }) => {
                         <TouchableOpacity
                             onPress={handleChangePassword}
                             disabled={saving}
-                            activeOpacity={0.8}>
+                            activeOpacity={0.8}
+                            style={{ borderRadius: 14, overflow: 'hidden' }}>
                             <LinearGradient
                                 colors={saving ? ['#d1d5db', '#d1d5db'] : ['#1e3a8a', '#3b82f6']}
-                                className="rounded-xl py-4 items-center flex-row justify-center">
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={{
+                                    borderRadius: 14,
+                                    paddingVertical: 14,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
                                 {saving && (
                                     <ActivityIndicator
                                         size="small"
@@ -574,7 +680,7 @@ const CoachSettingsScreen = ({ navigation }) => {
                                         style={{ marginRight: 8 }}
                                     />
                                 )}
-                                <Icon name="lock-check" size={20} color="#fff" />
+                                <Icon name="lock-check" size={18} color="#fff" />
                                 <Text className="text-white font-bold text-base ml-2">
                                     {saving ? 'Updating...' : 'Update Password'}
                                 </Text>
@@ -603,9 +709,19 @@ const CoachSettingsScreen = ({ navigation }) => {
                             onValueChange={handleToggle2FA}
                             disabled={saving}
                         />
-                        <View className="bg-blue-50 rounded-xl p-3 flex-row items-start">
-                            <Icon name="information-outline" size={18} color="#3b82f6" />
-                            <Text className="text-blue-700 text-xs ml-2 flex-1">
+                        <View
+                            className="rounded-2xl p-4 flex-row items-start"
+                            style={{
+                                backgroundColor: '#eff6ff',
+                                borderWidth: 1,
+                                borderColor: '#bfdbfe',
+                            }}>
+                            <View
+                                className="w-7 h-7 rounded-lg justify-center items-center mr-3"
+                                style={{ backgroundColor: '#dbeafe' }}>
+                                <Icon name="information-outline" size={16} color="#3b82f6" />
+                            </View>
+                            <Text className="text-blue-700 text-xs ml-0 flex-1 leading-4 font-medium">
                                 Two-factor authentication adds an extra layer of security. When enabled,
                                 you'll need to enter a verification code from your authenticator app each
                                 time you sign in.
@@ -618,21 +734,31 @@ const CoachSettingsScreen = ({ navigation }) => {
             {/* Active Sessions */}
             <SectionCard title="Active Sessions" icon="devices" iconColor="#8b5cf6">
                 <View
-                    className="flex-row items-center justify-between p-4 bg-white rounded-xl mb-3 shadow-sm"
-                    style={{ elevation: 2 }}>
+                    className="flex-row items-center justify-between p-4 bg-white rounded-2xl mb-3 shadow-sm"
+                    style={{
+                        elevation: 2,
+                        borderLeftWidth: 3,
+                        borderLeftColor: '#22c55e',
+                    }}>
                     <View className="flex-row items-center flex-1">
-                        <View className="w-10 h-10 rounded-lg bg-green-50 justify-center items-center">
+                        <LinearGradient
+                            colors={['#dcfce720', '#dcfce710']}
+                            className="w-11 h-11 rounded-xl justify-center items-center"
+                            style={{ borderRadius: 12 }}>
                             <Icon name="cellphone" size={20} color="#22c55e" />
-                        </View>
-                        <View className="ml-3 flex-1">
-                            <Text className="text-gray-900 font-semibold text-sm">Current Session</Text>
+                        </LinearGradient>
+                        <View className="ml-3.5 flex-1">
+                            <Text className="text-gray-900 font-bold text-sm">Current Session</Text>
                             <Text className="text-gray-400 text-xs mt-0.5">
                                 Mobile App • Los Angeles, CA
                             </Text>
                         </View>
                     </View>
-                    <View className="bg-green-100 px-2.5 py-1 rounded-full">
-                        <Text className="text-green-700 text-xs font-semibold">Active</Text>
+                    <View
+                        className="px-3 py-1.5 rounded-full flex-row items-center"
+                        style={{ backgroundColor: '#dcfce7' }}>
+                        <View className="w-2 h-2 rounded-full bg-green-500 mr-1.5" />
+                        <Text className="text-green-700 text-xs font-bold">Active</Text>
                     </View>
                 </View>
                 <TouchableOpacity
@@ -651,9 +777,18 @@ const CoachSettingsScreen = ({ navigation }) => {
                         )
                     }
                     activeOpacity={0.7}
-                    className="flex-row items-center justify-center p-3 border border-gray-200 rounded-xl">
-                    <Icon name="logout" size={18} color="#6b7280" />
-                    <Text className="text-gray-600 font-semibold text-sm ml-2">
+                    style={{
+                        borderRadius: 14,
+                        borderWidth: 1.5,
+                        borderColor: '#fee2e2',
+                        backgroundColor: '#fef2f2',
+                        paddingVertical: 14,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                    <Icon name="logout" size={18} color="#dc2626" />
+                    <Text style={{ color: '#dc2626', fontWeight: 'bold', fontSize: 14, marginLeft: 8 }}>
                         Sign Out All Other Sessions
                     </Text>
                 </TouchableOpacity>
@@ -661,7 +796,9 @@ const CoachSettingsScreen = ({ navigation }) => {
         </View>
     );
 
-    // ─── Render Preferences Tab ───
+    // ═══════════════════════════════════════════════
+    // ─── RENDER PREFERENCES TAB ───
+    // ═══════════════════════════════════════════════
     const renderPreferencesTab = () => (
         <View>
             <SectionCard title="General Preferences" icon="cog-outline" iconColor="#1e3a8a">
@@ -762,10 +899,19 @@ const CoachSettingsScreen = ({ navigation }) => {
                             onPress={handleSavePreferences}
                             disabled={saving}
                             activeOpacity={0.8}
-                            className="mt-2">
+                            className="mt-3"
+                            style={{ borderRadius: 14, overflow: 'hidden' }}>
                             <LinearGradient
                                 colors={saving ? ['#d1d5db', '#d1d5db'] : ['#1e3a8a', '#3b82f6']}
-                                className="rounded-xl py-4 items-center flex-row justify-center">
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={{
+                                    borderRadius: 14,
+                                    paddingVertical: 14,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
                                 {saving && (
                                     <ActivityIndicator
                                         size="small"
@@ -773,7 +919,7 @@ const CoachSettingsScreen = ({ navigation }) => {
                                         style={{ marginRight: 8 }}
                                     />
                                 )}
-                                <Icon name="content-save-outline" size={20} color="#fff" />
+                                <Icon name="content-save-outline" size={18} color="#fff" />
                                 <Text className="text-white font-bold text-base ml-2">
                                     {saving ? 'Saving...' : 'Save All Settings'}
                                 </Text>
@@ -785,80 +931,168 @@ const CoachSettingsScreen = ({ navigation }) => {
         </View>
     );
 
+    // ═══════════════════════════════════════════════
+    // ─── LOADING STATE (Dashboard Style) ───
+    // ═══════════════════════════════════════════════
+    if (loading) {
+        return (
+            <View className="flex-1 bg-gray-50 justify-center items-center">
+                <View className="w-16 h-16 rounded-2xl bg-blue-50 justify-center items-center mb-4">
+                    <ActivityIndicator size="large" color="#1e3a8a" />
+                </View>
+                <Text className="text-gray-900 font-bold text-base">Loading Settings</Text>
+                <Text className="text-gray-400 mt-1 text-sm">Preparing your preferences...</Text>
+            </View>
+        );
+    }
+
     return (
-        <ScrollView
-            className="flex-1 bg-gray-50"
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    colors={['#1e3a8a']}
-                />
-            }>
-            {/* ─── Header ─── */}
-            <LinearGradient
-                colors={['#1e3a8a', '#3b82f6']}
-                className="px-6 pt-12 pb-8 rounded-b-[30px]">
-                <View className="flex-row justify-between items-center mb-4">
-                    <View className="flex-row items-center">
+        <View className="flex-1 bg-gray-50">
+            <ScrollView
+                className="flex-1"
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={['#1e3a8a']}
+                        tintColor="#1e3a8a"
+                    />
+                }>
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── HEADER WITH GRADIENT (Dashboard Style) ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <LinearGradient
+                    colors={['#0f172a', '#1e3a8a', '#3b82f6']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{
+                        paddingTop: 48,
+                        paddingBottom: 40,
+                        borderBottomLeftRadius: 32,
+                        borderBottomRightRadius: 32,
+                    }}>
+                    {/* Top Bar */}
+                    <View className="flex-row justify-between items-center px-5 mb-5">
                         <DrawerMenuButton />
-                        <View className="ml-2">
-                            <Text className="text-white font-bold text-2xl">Settings</Text>
-                            <Text className="text-white/80 text-sm">
-                                Manage your account preferences
-                            </Text>
+                        <View className="flex-row items-center">
+                            <TouchableOpacity
+                                onPress={onRefresh}
+                                disabled={refreshing}
+                                className="w-10 h-10 bg-white/15 rounded-full justify-center items-center"
+                                style={{ borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+                                <Icon
+                                    name="refresh"
+                                    size={20}
+                                    color="#fff"
+                                    style={refreshing ? { transform: [{ rotate: '45deg' }] } : undefined}
+                                />
+                            </TouchableOpacity>
                         </View>
                     </View>
-                    <TouchableOpacity
-                        onPress={onRefresh}
-                        disabled={loading}
-                        className="w-10 h-10 bg-white/20 rounded-full justify-center items-center">
-                        <Icon
-                            name="refresh"
-                            size={22}
-                            color="#fff"
-                            style={loading ? { transform: [{ rotate: '45deg' }] } : undefined}
+
+                    {/* Settings Header Content */}
+                    <View className="px-5">
+                        <View className="flex-row items-center mb-2">
+                            <View
+                                className="w-12 h-12 rounded-2xl justify-center items-center mr-4"
+                                style={{ backgroundColor: 'rgba(255,255,255,0.15)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+                                <Icon name="cog" size={24} color="#fff" />
+                            </View>
+                            <View className="flex-1">
+                                <Text className="text-white font-bold text-2xl">Settings</Text>
+                                <Text className="text-white/60 text-sm mt-0.5 font-medium">
+                                    Manage your account preferences
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Quick Settings Info Bar */}
+                    <View
+                        className="mx-5 mt-4 bg-white/10 rounded-2xl p-4"
+                        style={{ borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+                        <View className="flex-row items-center justify-between">
+                            <View className="flex-1 items-center">
+                                <View className="w-8 h-8 bg-green-400/20 rounded-lg justify-center items-center mb-1.5">
+                                    <Icon name="shield-check" size={14} color="#4ade80" />
+                                </View>
+                                <Text className="text-white/50 text-[10px] font-semibold uppercase">
+                                    2FA
+                                </Text>
+                                <Text className="text-white font-bold text-xs mt-0.5">
+                                    {twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                                </Text>
+                            </View>
+                            <View className="w-px h-10 bg-white/10" />
+                            <View className="flex-1 items-center">
+                                <View className="w-8 h-8 bg-blue-400/20 rounded-lg justify-center items-center mb-1.5">
+                                    <Icon name="bell-outline" size={14} color="#60a5fa" />
+                                </View>
+                                <Text className="text-white/50 text-[10px] font-semibold uppercase">
+                                    Push
+                                </Text>
+                                <Text className="text-white font-bold text-xs mt-0.5">
+                                    {notifications.push ? 'On' : 'Off'}
+                                </Text>
+                            </View>
+                            <View className="w-px h-10 bg-white/10" />
+                            <View className="flex-1 items-center">
+                                <View className="w-8 h-8 bg-purple-400/20 rounded-lg justify-center items-center mb-1.5">
+                                    <Icon name="translate" size={14} color="#a78bfa" />
+                                </View>
+                                <Text className="text-white/50 text-[10px] font-semibold uppercase">
+                                    Language
+                                </Text>
+                                <Text className="text-white font-bold text-xs mt-0.5">
+                                    {preferences.language === 'en' ? 'English' : preferences.language.toUpperCase()}
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                </LinearGradient>
+
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── TAB NAVIGATION (Dashboard Style) ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <View className="px-4 -mt-5">
+                    <View
+                        className="bg-gray-100 rounded-2xl p-1.5 flex-row shadow-md"
+                        style={{ elevation: 4, borderWidth: 1, borderColor: '#f3f4f6' }}>
+                        <TabButton
+                            label="Alerts"
+                            icon="bell-outline"
+                            isActive={activeTab === 'notifications'}
+                            onPress={() => setActiveTab('notifications')}
                         />
-                    </TouchableOpacity>
+                        <TabButton
+                            label="Security"
+                            icon="lock-outline"
+                            isActive={activeTab === 'security'}
+                            onPress={() => setActiveTab('security')}
+                        />
+                        <TabButton
+                            label="Prefs"
+                            icon="cog-outline"
+                            isActive={activeTab === 'preferences'}
+                            onPress={() => setActiveTab('preferences')}
+                        />
+                    </View>
                 </View>
-            </LinearGradient>
 
-            {/* ─── Tab Selector ─── */}
-            <View className="px-4 -mt-5">
-                <View
-                    className="bg-white rounded-2xl p-1.5 flex-row shadow-md"
-                    style={{ elevation: 4 }}>
-                    <TabButton
-                        label="Alerts"
-                        icon="bell-outline"
-                        isActive={activeTab === 'notifications'}
-                        onPress={() => setActiveTab('notifications')}
-                    />
-                    <TabButton
-                        label="Security"
-                        icon="lock-outline"
-                        isActive={activeTab === 'security'}
-                        onPress={() => setActiveTab('security')}
-                    />
-                    <TabButton
-                        label="Prefs"
-                        icon="cog-outline"
-                        isActive={activeTab === 'preferences'}
-                        onPress={() => setActiveTab('preferences')}
-                    />
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── TAB CONTENT ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <View className="px-4 mt-6">
+                    {activeTab === 'notifications' && renderNotificationsTab()}
+                    {activeTab === 'security' && renderSecurityTab()}
+                    {activeTab === 'preferences' && renderPreferencesTab()}
                 </View>
-            </View>
 
-            {/* ─── Tab Content ─── */}
-            <View className="px-4 mt-6">
-                {activeTab === 'notifications' && renderNotificationsTab()}
-                {activeTab === 'security' && renderSecurityTab()}
-                {activeTab === 'preferences' && renderPreferencesTab()}
-            </View>
-
-            {/* Bottom Spacing */}
-            <View className="h-8" />
-        </ScrollView>
+                {/* Bottom Spacing */}
+                <View className="h-8" />
+            </ScrollView>
+        </View>
     );
 };
 

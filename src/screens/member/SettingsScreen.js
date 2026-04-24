@@ -46,36 +46,80 @@ const mockSettingsService = {
     },
 };
 
-// ─── Tab Button Component ───
+// ═══════════════════════════════════════════════
+// ─── ENHANCED TAB BUTTON (Dashboard Style) ───
+// ═══════════════════════════════════════════════
 const TabButton = ({ label, icon, isActive, onPress }) => (
     <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.7}
-        className={`flex-1 flex-row items-center justify-center py-3 rounded-xl ${isActive ? 'bg-emerald-500' : 'bg-transparent'
-            }`}>
-        <Icon name={icon} size={18} color={isActive ? '#fff' : '#6b7280'} />
-        <Text
-            className={`ml-1.5 font-semibold text-sm ${isActive ? 'text-white' : 'text-gray-500'
-                }`}>
-            {label}
-        </Text>
+        className="flex-1 py-3 items-center rounded-xl"
+        style={{
+            backgroundColor: isActive ? undefined : 'transparent',
+            overflow: 'hidden',
+        }}>
+        {isActive ? (
+            <LinearGradient
+                colors={['#064e3b', '#059669']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    borderRadius: 12,
+                }}
+            />
+        ) : null}
+        <View className="flex-row items-center">
+            <Icon
+                name={icon}
+                size={14}
+                color={isActive ? '#ffffff' : '#9ca3af'}
+                style={{ marginRight: 4 }}
+            />
+            <Text
+                className="text-xs font-bold"
+                style={{ color: isActive ? '#ffffff' : '#9ca3af' }}>
+                {label}
+            </Text>
+        </View>
     </TouchableOpacity>
 );
 
-// ─── Toggle Row Component ───
-const ToggleRow = ({ icon, iconColor, title, description, value, onValueChange, disabled }) => (
+// ═══════════════════════════════════════════════
+// ─── ENHANCED TOGGLE ROW ───
+// ═══════════════════════════════════════════════
+const ToggleRow = ({
+    icon,
+    iconColor,
+    title,
+    description,
+    value,
+    onValueChange,
+    disabled,
+}) => (
     <View
-        className="flex-row items-center justify-between p-4 bg-white rounded-xl mb-3 shadow-sm"
-        style={{ elevation: 2 }}>
+        className="flex-row items-center justify-between p-4 bg-white rounded-2xl mb-3 shadow-sm"
+        style={{
+            elevation: 2,
+            borderLeftWidth: 3,
+            borderLeftColor: value ? iconColor : '#e5e7eb',
+        }}>
         <View className="flex-row items-center flex-1 mr-3">
-            <View
-                className="w-10 h-10 rounded-lg justify-center items-center"
-                style={{ backgroundColor: `${iconColor}15` }}>
+            <LinearGradient
+                colors={[`${iconColor}20`, `${iconColor}10`]}
+                className="w-11 h-11 rounded-xl justify-center items-center"
+                style={{ borderRadius: 12 }}>
                 <Icon name={icon} size={20} color={iconColor} />
-            </View>
-            <View className="ml-3 flex-1">
-                <Text className="text-gray-900 font-semibold text-sm">{title}</Text>
-                <Text className="text-gray-400 text-xs mt-0.5">{description}</Text>
+            </LinearGradient>
+            <View className="ml-3.5 flex-1">
+                <Text className="text-gray-900 font-bold text-sm">{title}</Text>
+                <Text className="text-gray-400 text-xs mt-0.5 leading-4">
+                    {description}
+                </Text>
             </View>
         </View>
         <Switch
@@ -88,16 +132,20 @@ const ToggleRow = ({ icon, iconColor, title, description, value, onValueChange, 
     </View>
 );
 
-// ─── Section Card Component ───
+// ═══════════════════════════════════════════════
+// ─── ENHANCED SECTION CARD ───
+// ═══════════════════════════════════════════════
 const SectionCard = ({ title, icon, iconColor, children }) => (
-    <View className="bg-gray-50 rounded-2xl p-4 mb-4">
+    <View
+        className="bg-white rounded-2xl p-5 mb-4 shadow-md"
+        style={{ elevation: 3 }}>
         <View className="flex-row items-center mb-4">
             <View
-                className="w-9 h-9 rounded-lg justify-center items-center"
-                style={{ backgroundColor: `${iconColor}15` }}>
-                <Icon name={icon} size={20} color={iconColor} />
+                className="w-8 h-8 rounded-lg justify-center items-center mr-2.5"
+                style={{ backgroundColor: `${iconColor}12` }}>
+                <Icon name={icon} size={16} color={iconColor} />
             </View>
-            <Text className="text-gray-900 font-bold text-lg ml-2">{title}</Text>
+            <Text className="text-gray-900 font-bold text-lg">{title}</Text>
         </View>
         {children}
     </View>
@@ -109,14 +157,16 @@ const SkeletonLoader = ({ count = 3 }) => (
         {Array.from({ length: count }).map((_, i) => (
             <View
                 key={i}
-                className="bg-gray-200 rounded-xl h-16 mb-3"
-                style={{ opacity: 0.5 }}
+                className="bg-gray-100 rounded-2xl h-16 mb-3"
+                style={{ opacity: 0.6 }}
             />
         ))}
     </View>
 );
 
-// ─── Main Settings Screen ───
+// ═══════════════════════════════════════════════
+// ─── MAIN SETTINGS SCREEN ───
+// ═══════════════════════════════════════════════
 const SettingsScreen = ({ navigation }) => {
     const [activeTab, setActiveTab] = useState('security');
     const [loading, setLoading] = useState(true);
@@ -206,7 +256,11 @@ const SettingsScreen = ({ navigation }) => {
                 newPassword: passwordForm.newPassword,
             });
             Alert.alert('Success', 'Password changed successfully!');
-            setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            setPasswordForm({
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: '',
+            });
         } catch (error) {
             Alert.alert('Error', 'Failed to change password: ' + error.message);
         } finally {
@@ -257,14 +311,29 @@ const SettingsScreen = ({ navigation }) => {
         }
     };
 
-    // ─── Password Input Component ───
-    const PasswordInput = ({ label, value, onChangeText, showPassword, toggleShow, placeholder }) => (
+    // ─── Enhanced Password Input Component ───
+    const PasswordInput = ({
+        label,
+        value,
+        onChangeText,
+        showPassword,
+        toggleShow,
+        placeholder,
+    }) => (
         <View className="mb-4">
-            <Text className="text-gray-700 font-medium text-sm mb-2">{label}</Text>
-            <View className="flex-row items-center bg-white rounded-xl border border-gray-200 px-4">
-                <Icon name="lock-outline" size={20} color="#9ca3af" />
+            <Text className="text-gray-400 text-[11px] mb-2 font-bold uppercase tracking-wider">
+                {label}
+            </Text>
+            <View
+                className="flex-row items-center bg-gray-50 rounded-xl border border-gray-200 px-4"
+                style={{ borderWidth: 1.5 }}>
+                <View
+                    className="w-8 h-8 rounded-lg justify-center items-center mr-2"
+                    style={{ backgroundColor: '#05966912' }}>
+                    <Icon name="lock-outline" size={16} color="#059669" />
+                </View>
                 <TextInput
-                    className="flex-1 py-3.5 px-3 text-gray-900 text-sm"
+                    className="flex-1 py-3.5 text-gray-900 text-sm font-medium"
                     secureTextEntry={!showPassword}
                     value={value}
                     onChangeText={onChangeText}
@@ -272,22 +341,31 @@ const SettingsScreen = ({ navigation }) => {
                     placeholderTextColor="#d1d5db"
                     autoCapitalize="none"
                 />
-                <TouchableOpacity onPress={toggleShow} activeOpacity={0.7}>
+                <TouchableOpacity
+                    onPress={toggleShow}
+                    activeOpacity={0.7}
+                    className="w-8 h-8 rounded-full justify-center items-center"
+                    style={{ backgroundColor: '#f3f4f6' }}>
                     <Icon
                         name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                        size={20}
-                        color="#9ca3af"
+                        size={18}
+                        color="#6b7280"
                     />
                 </TouchableOpacity>
             </View>
         </View>
     );
 
-    // ─── Render Security Tab ───
+    // ═══════════════════════════════════════════════
+    // ─── RENDER SECURITY TAB ───
+    // ═══════════════════════════════════════════════
     const renderSecurityTab = () => (
         <View>
             {/* Change Password Section */}
-            <SectionCard title="Change Password" icon="lock-outline" iconColor="#059669">
+            <SectionCard
+                title="Change Password"
+                icon="lock-outline"
+                iconColor="#059669">
                 {loading ? (
                     <SkeletonLoader count={3} />
                 ) : (
@@ -296,39 +374,110 @@ const SettingsScreen = ({ navigation }) => {
                             label="Current Password"
                             value={passwordForm.currentPassword}
                             onChangeText={text =>
-                                setPasswordForm(p => ({ ...p, currentPassword: text }))
+                                setPasswordForm(p => ({
+                                    ...p,
+                                    currentPassword: text,
+                                }))
                             }
                             showPassword={showCurrentPassword}
-                            toggleShow={() => setShowCurrentPassword(!showCurrentPassword)}
+                            toggleShow={() =>
+                                setShowCurrentPassword(!showCurrentPassword)
+                            }
                             placeholder="Enter current password"
                         />
                         <PasswordInput
                             label="New Password"
                             value={passwordForm.newPassword}
                             onChangeText={text =>
-                                setPasswordForm(p => ({ ...p, newPassword: text }))
+                                setPasswordForm(p => ({
+                                    ...p,
+                                    newPassword: text,
+                                }))
                             }
                             showPassword={showNewPassword}
-                            toggleShow={() => setShowNewPassword(!showNewPassword)}
+                            toggleShow={() =>
+                                setShowNewPassword(!showNewPassword)
+                            }
                             placeholder="Enter new password"
                         />
                         <PasswordInput
                             label="Confirm New Password"
                             value={passwordForm.confirmPassword}
                             onChangeText={text =>
-                                setPasswordForm(p => ({ ...p, confirmPassword: text }))
+                                setPasswordForm(p => ({
+                                    ...p,
+                                    confirmPassword: text,
+                                }))
                             }
                             showPassword={showConfirmPassword}
-                            toggleShow={() => setShowConfirmPassword(!showConfirmPassword)}
+                            toggleShow={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                            }
                             placeholder="Confirm new password"
                         />
+
+                        {/* Password Strength Indicator */}
+                        {passwordForm.newPassword.length > 0 && (
+                            <View className="mb-4">
+                                <View className="flex-row mb-1.5" style={{ gap: 4 }}>
+                                    {[1, 2, 3, 4].map(i => (
+                                        <View
+                                            key={i}
+                                            className="flex-1 h-1.5 rounded-full"
+                                            style={{
+                                                backgroundColor:
+                                                    passwordForm.newPassword.length >= i * 3
+                                                        ? passwordForm.newPassword.length >= 12
+                                                            ? '#059669'
+                                                            : passwordForm.newPassword.length >= 8
+                                                                ? '#f59e0b'
+                                                                : '#ef4444'
+                                                        : '#e5e7eb',
+                                            }}
+                                        />
+                                    ))}
+                                </View>
+                                <Text
+                                    className="text-[10px] font-semibold"
+                                    style={{
+                                        color:
+                                            passwordForm.newPassword.length >= 12
+                                                ? '#059669'
+                                                : passwordForm.newPassword.length >= 8
+                                                    ? '#f59e0b'
+                                                    : '#ef4444',
+                                    }}>
+                                    {passwordForm.newPassword.length >= 12
+                                        ? 'Strong password'
+                                        : passwordForm.newPassword.length >= 8
+                                            ? 'Medium strength'
+                                            : passwordForm.newPassword.length >= 6
+                                                ? 'Weak password'
+                                                : 'Too short'}
+                                </Text>
+                            </View>
+                        )}
+
                         <TouchableOpacity
                             onPress={handleChangePassword}
                             disabled={saving}
-                            activeOpacity={0.8}>
+                            activeOpacity={0.8}
+                            style={{ borderRadius: 14, overflow: 'hidden' }}>
                             <LinearGradient
-                                colors={saving ? ['#d1d5db', '#d1d5db'] : ['#059669', '#10b981']}
-                                className="rounded-xl py-4 items-center flex-row justify-center">
+                                colors={
+                                    saving
+                                        ? ['#d1d5db', '#d1d5db']
+                                        : ['#064e3b', '#059669']
+                                }
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={{
+                                    borderRadius: 14,
+                                    paddingVertical: 14,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
                                 {saving && (
                                     <ActivityIndicator
                                         size="small"
@@ -336,7 +485,7 @@ const SettingsScreen = ({ navigation }) => {
                                         style={{ marginRight: 8 }}
                                     />
                                 )}
-                                <Icon name="lock-check" size={20} color="#fff" />
+                                <Icon name="lock-check" size={18} color="#fff" />
                                 <Text className="text-white font-bold text-base ml-2">
                                     {saving ? 'Updating...' : 'Update Password'}
                                 </Text>
@@ -347,7 +496,10 @@ const SettingsScreen = ({ navigation }) => {
             </SectionCard>
 
             {/* Two-Factor Authentication Section */}
-            <SectionCard title="Two-Factor Authentication" icon="shield-lock-outline" iconColor="#3b82f6">
+            <SectionCard
+                title="Two-Factor Authentication"
+                icon="shield-lock-outline"
+                iconColor="#3b82f6">
                 {loading ? (
                     <SkeletonLoader count={1} />
                 ) : (
@@ -365,24 +517,188 @@ const SettingsScreen = ({ navigation }) => {
                             onValueChange={handleToggle2FA}
                             disabled={saving}
                         />
-                        <View className="bg-blue-50 rounded-xl p-3 flex-row items-start">
-                            <Icon name="information-outline" size={18} color="#3b82f6" />
-                            <Text className="text-blue-700 text-xs ml-2 flex-1">
-                                Two-factor authentication adds an extra layer of security. When enabled,
-                                you'll need to enter a verification code from your authenticator app each
-                                time you sign in.
+                        <View
+                            className="rounded-2xl p-4 flex-row items-start"
+                            style={{
+                                backgroundColor: '#eff6ff',
+                                borderWidth: 1,
+                                borderColor: '#bfdbfe',
+                            }}>
+                            <View
+                                className="w-7 h-7 rounded-lg justify-center items-center mr-3 mt-0.5"
+                                style={{ backgroundColor: '#dbeafe' }}>
+                                <Icon
+                                    name="information-outline"
+                                    size={16}
+                                    color="#3b82f6"
+                                />
+                            </View>
+                            <Text className="text-blue-700 text-xs flex-1 leading-4 font-medium">
+                                Two-factor authentication adds an extra layer of security.
+                                When enabled, you'll need to enter a verification code from
+                                your authenticator app each time you sign in.
                             </Text>
+                        </View>
+
+                        {/* 2FA Status Card */}
+                        <View
+                            className="mt-3 rounded-2xl p-4 flex-row items-center"
+                            style={{
+                                backgroundColor: twoFactorEnabled
+                                    ? '#f0fdf4'
+                                    : '#fef2f2',
+                                borderWidth: 1,
+                                borderColor: twoFactorEnabled
+                                    ? '#bbf7d0'
+                                    : '#fecaca',
+                            }}>
+                            <View
+                                className="w-10 h-10 rounded-xl justify-center items-center mr-3"
+                                style={{
+                                    backgroundColor: twoFactorEnabled
+                                        ? '#dcfce7'
+                                        : '#fee2e2',
+                                }}>
+                                <Icon
+                                    name={
+                                        twoFactorEnabled
+                                            ? 'shield-check'
+                                            : 'shield-alert-outline'
+                                    }
+                                    size={22}
+                                    color={
+                                        twoFactorEnabled ? '#16a34a' : '#dc2626'
+                                    }
+                                />
+                            </View>
+                            <View className="flex-1">
+                                <Text
+                                    className="font-bold text-sm"
+                                    style={{
+                                        color: twoFactorEnabled
+                                            ? '#166534'
+                                            : '#991b1b',
+                                    }}>
+                                    {twoFactorEnabled
+                                        ? 'Account Protected'
+                                        : 'Account Vulnerable'}
+                                </Text>
+                                <Text
+                                    className="text-xs mt-0.5"
+                                    style={{
+                                        color: twoFactorEnabled
+                                            ? '#15803d'
+                                            : '#b91c1c',
+                                    }}>
+                                    {twoFactorEnabled
+                                        ? 'Your account has an extra layer of security'
+                                        : 'Enable 2FA to protect your account'}
+                                </Text>
+                            </View>
+                            {!twoFactorEnabled && (
+                                <View className="bg-red-100 px-2.5 py-1 rounded-full">
+                                    <Text className="text-red-700 text-[10px] font-bold">
+                                        Action Needed
+                                    </Text>
+                                </View>
+                            )}
                         </View>
                     </View>
                 )}
             </SectionCard>
+
+            {/* Active Sessions Section */}
+            <SectionCard
+                title="Active Sessions"
+                icon="devices"
+                iconColor="#8b5cf6">
+                <View
+                    className="flex-row items-center justify-between p-4 bg-white rounded-2xl mb-3 shadow-sm"
+                    style={{
+                        elevation: 2,
+                        borderLeftWidth: 3,
+                        borderLeftColor: '#22c55e',
+                    }}>
+                    <View className="flex-row items-center flex-1">
+                        <LinearGradient
+                            colors={['#dcfce720', '#dcfce710']}
+                            className="w-11 h-11 rounded-xl justify-center items-center"
+                            style={{ borderRadius: 12 }}>
+                            <Icon name="cellphone" size={20} color="#22c55e" />
+                        </LinearGradient>
+                        <View className="ml-3.5 flex-1">
+                            <Text className="text-gray-900 font-bold text-sm">
+                                Current Session
+                            </Text>
+                            <Text className="text-gray-400 text-xs mt-0.5">
+                                Mobile App • Active Now
+                            </Text>
+                        </View>
+                    </View>
+                    <View
+                        className="px-3 py-1.5 rounded-full flex-row items-center"
+                        style={{ backgroundColor: '#dcfce7' }}>
+                        <View className="w-2 h-2 rounded-full bg-green-500 mr-1.5" />
+                        <Text className="text-green-700 text-xs font-bold">
+                            Active
+                        </Text>
+                    </View>
+                </View>
+                <TouchableOpacity
+                    onPress={() =>
+                        Alert.alert(
+                            'Sign Out',
+                            'Are you sure you want to sign out all other sessions?',
+                            [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                    text: 'Sign Out',
+                                    style: 'destructive',
+                                    onPress: () =>
+                                        Alert.alert(
+                                            'Success',
+                                            'All other sessions signed out.',
+                                        ),
+                                },
+                            ],
+                        )
+                    }
+                    activeOpacity={0.7}
+                    style={{
+                        borderRadius: 14,
+                        borderWidth: 1.5,
+                        borderColor: '#fee2e2',
+                        backgroundColor: '#fef2f2',
+                        paddingVertical: 14,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                    <Icon name="logout" size={18} color="#dc2626" />
+                    <Text
+                        style={{
+                            color: '#dc2626',
+                            fontWeight: 'bold',
+                            fontSize: 14,
+                            marginLeft: 8,
+                        }}>
+                        Sign Out All Other Sessions
+                    </Text>
+                </TouchableOpacity>
+            </SectionCard>
         </View>
     );
 
-    // ─── Render Notifications Tab ───
+    // ═══════════════════════════════════════════════
+    // ─── RENDER NOTIFICATIONS TAB ───
+    // ═══════════════════════════════════════════════
     const renderNotificationsTab = () => (
         <View>
-            <SectionCard title="Notification Channels" icon="bell-outline" iconColor="#f59e0b">
+            {/* Notification Channels */}
+            <SectionCard
+                title="Notification Method"
+                icon="tune-variant"
+                iconColor="#3b82f6">
                 {loading ? (
                     <SkeletonLoader count={3} />
                 ) : (
@@ -393,7 +709,9 @@ const SettingsScreen = ({ navigation }) => {
                             title="Email Notifications"
                             description="Receive notifications via email"
                             value={notifications.email}
-                            onValueChange={v => setNotifications(p => ({ ...p, email: v }))}
+                            onValueChange={v =>
+                                setNotifications(p => ({ ...p, email: v }))
+                            }
                             disabled={saving}
                         />
                         <ToggleRow
@@ -402,27 +720,132 @@ const SettingsScreen = ({ navigation }) => {
                             title="Push Notifications"
                             description="Receive push notifications on your device"
                             value={notifications.push}
-                            onValueChange={v => setNotifications(p => ({ ...p, push: v }))}
+                            onValueChange={v =>
+                                setNotifications(p => ({ ...p, push: v }))
+                            }
                             disabled={saving}
                         />
                         <ToggleRow
-                            icon="message-text-outline"
+                            icon="cellphone-message"
                             iconColor="#8b5cf6"
                             title="SMS Notifications"
                             description="Receive notifications via SMS"
                             value={notifications.sms}
-                            onValueChange={v => setNotifications(p => ({ ...p, sms: v }))}
+                            onValueChange={v =>
+                                setNotifications(p => ({ ...p, sms: v }))
+                            }
                             disabled={saving}
                         />
+
+                        {/* Notification Summary Card */}
+                        <View
+                            className="rounded-2xl p-4"
+                            style={{
+                                backgroundColor: '#f0fdf4',
+                                borderWidth: 1,
+                                borderColor: '#bbf7d0',
+                            }}>
+                            <View className="flex-row items-center mb-3">
+                                <View
+                                    className="w-7 h-7 rounded-lg justify-center items-center mr-2"
+                                    style={{ backgroundColor: '#dcfce7' }}>
+                                    <Icon
+                                        name="chart-bar"
+                                        size={14}
+                                        color="#059669"
+                                    />
+                                </View>
+                                <Text className="text-green-800 font-bold text-xs">
+                                    NOTIFICATION SUMMARY
+                                </Text>
+                            </View>
+                            <View className="flex-row" style={{ gap: 8 }}>
+                                {[
+                                    {
+                                        label: 'Email',
+                                        active: notifications.email,
+                                        color: '#059669',
+                                    },
+                                    {
+                                        label: 'Push',
+                                        active: notifications.push,
+                                        color: '#3b82f6',
+                                    },
+                                    {
+                                        label: 'SMS',
+                                        active: notifications.sms,
+                                        color: '#8b5cf6',
+                                    },
+                                ].map(channel => (
+                                    <View
+                                        key={channel.label}
+                                        className="flex-1 rounded-xl p-3 items-center"
+                                        style={{
+                                            backgroundColor: channel.active
+                                                ? `${channel.color}12`
+                                                : '#fef2f2',
+                                            borderWidth: 1,
+                                            borderColor: channel.active
+                                                ? `${channel.color}30`
+                                                : '#fecaca',
+                                        }}>
+                                        <Icon
+                                            name={
+                                                channel.active
+                                                    ? 'check-circle'
+                                                    : 'close-circle'
+                                            }
+                                            size={20}
+                                            color={
+                                                channel.active
+                                                    ? channel.color
+                                                    : '#ef4444'
+                                            }
+                                        />
+                                        <Text
+                                            className="text-[10px] font-bold mt-1"
+                                            style={{
+                                                color: channel.active
+                                                    ? channel.color
+                                                    : '#ef4444',
+                                            }}>
+                                            {channel.label}
+                                        </Text>
+                                        <Text
+                                            className="text-[9px] mt-0.5 font-medium"
+                                            style={{
+                                                color: channel.active
+                                                    ? `${channel.color}99`
+                                                    : '#ef444480',
+                                            }}>
+                                            {channel.active ? 'Enabled' : 'Disabled'}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
 
                         <TouchableOpacity
                             onPress={handleSaveNotifications}
                             disabled={saving}
                             activeOpacity={0.8}
-                            className="mt-2">
+                            className="mt-3"
+                            style={{ borderRadius: 14, overflow: 'hidden' }}>
                             <LinearGradient
-                                colors={saving ? ['#d1d5db', '#d1d5db'] : ['#f59e0b', '#fbbf24']}
-                                className="rounded-xl py-4 items-center flex-row justify-center">
+                                colors={
+                                    saving
+                                        ? ['#d1d5db', '#d1d5db']
+                                        : ['#064e3b', '#059669']
+                                }
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={{
+                                    borderRadius: 14,
+                                    paddingVertical: 14,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
                                 {saving && (
                                     <ActivityIndicator
                                         size="small"
@@ -430,7 +853,11 @@ const SettingsScreen = ({ navigation }) => {
                                         style={{ marginRight: 8 }}
                                     />
                                 )}
-                                <Icon name="content-save-outline" size={20} color="#fff" />
+                                <Icon
+                                    name="content-save-outline"
+                                    size={18}
+                                    color="#fff"
+                                />
                                 <Text className="text-white font-bold text-base ml-2">
                                     {saving ? 'Saving...' : 'Save Preferences'}
                                 </Text>
@@ -439,13 +866,53 @@ const SettingsScreen = ({ navigation }) => {
                     </View>
                 )}
             </SectionCard>
+
+            {/* Notification Tips */}
+            <SectionCard
+                title="Tips"
+                icon="lightbulb-outline"
+                iconColor="#f59e0b">
+                <View
+                    className="rounded-2xl p-4 flex-row items-start"
+                    style={{
+                        backgroundColor: '#fffbeb',
+                        borderWidth: 1,
+                        borderColor: '#fde68a',
+                    }}>
+                    <View
+                        className="w-7 h-7 rounded-lg justify-center items-center mr-3 mt-0.5"
+                        style={{ backgroundColor: '#fef3c7' }}>
+                        <Icon
+                            name="lightbulb-on-outline"
+                            size={16}
+                            color="#f59e0b"
+                        />
+                    </View>
+                    <View className="flex-1">
+                        <Text className="text-amber-800 font-bold text-xs mb-1">
+                            RECOMMENDED SETTINGS
+                        </Text>
+                        <Text className="text-amber-700 text-xs leading-4">
+                            For the best experience, we recommend enabling push
+                            notifications and email notifications. SMS is optional
+                            and may incur carrier charges.
+                        </Text>
+                    </View>
+                </View>
+            </SectionCard>
         </View>
     );
 
-    // ─── Render Privacy Tab ───
+    // ═══════════════════════════════════════════════
+    // ─── RENDER PRIVACY TAB ───
+    // ═══════════════════════════════════════════════
     const renderPrivacyTab = () => (
         <View>
-            <SectionCard title="Privacy Controls" icon="eye-outline" iconColor="#8b5cf6">
+            {/* Privacy Controls */}
+            <SectionCard
+                title="Privacy Controls"
+                icon="eye-outline"
+                iconColor="#8b5cf6">
                 {loading ? (
                     <SkeletonLoader count={2} />
                 ) : (
@@ -456,7 +923,12 @@ const SettingsScreen = ({ navigation }) => {
                             title="Profile Visibility"
                             description="Allow other members to see your profile"
                             value={privacy.profileVisible}
-                            onValueChange={v => setPrivacy(p => ({ ...p, profileVisible: v }))}
+                            onValueChange={v =>
+                                setPrivacy(p => ({
+                                    ...p,
+                                    profileVisible: v,
+                                }))
+                            }
                             disabled={saving}
                         />
                         <ToggleRow
@@ -465,18 +937,94 @@ const SettingsScreen = ({ navigation }) => {
                             title="Show Activity"
                             description="Display your activity on leaderboards"
                             value={privacy.showActivity}
-                            onValueChange={v => setPrivacy(p => ({ ...p, showActivity: v }))}
+                            onValueChange={v =>
+                                setPrivacy(p => ({ ...p, showActivity: v }))
+                            }
                             disabled={saving}
                         />
+
+                        {/* Privacy Status Card */}
+                        <View
+                            className="rounded-2xl p-4"
+                            style={{
+                                backgroundColor: privacy.profileVisible
+                                    ? '#f0fdf4'
+                                    : '#fef2f2',
+                                borderWidth: 1,
+                                borderColor: privacy.profileVisible
+                                    ? '#bbf7d0'
+                                    : '#fecaca',
+                            }}>
+                            <View className="flex-row items-center">
+                                <View
+                                    className="w-10 h-10 rounded-xl justify-center items-center mr-3"
+                                    style={{
+                                        backgroundColor: privacy.profileVisible
+                                            ? '#dcfce7'
+                                            : '#fee2e2',
+                                    }}>
+                                    <Icon
+                                        name={
+                                            privacy.profileVisible
+                                                ? 'eye-check'
+                                                : 'eye-off'
+                                        }
+                                        size={22}
+                                        color={
+                                            privacy.profileVisible
+                                                ? '#16a34a'
+                                                : '#dc2626'
+                                        }
+                                    />
+                                </View>
+                                <View className="flex-1">
+                                    <Text
+                                        className="font-bold text-sm"
+                                        style={{
+                                            color: privacy.profileVisible
+                                                ? '#166534'
+                                                : '#991b1b',
+                                        }}>
+                                        {privacy.profileVisible
+                                            ? 'Profile is Public'
+                                            : 'Profile is Private'}
+                                    </Text>
+                                    <Text
+                                        className="text-xs mt-0.5"
+                                        style={{
+                                            color: privacy.profileVisible
+                                                ? '#15803d'
+                                                : '#b91c1c',
+                                        }}>
+                                        {privacy.profileVisible
+                                            ? 'Other members can find and view your profile'
+                                            : 'Only you can see your profile information'}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
 
                         <TouchableOpacity
                             onPress={handleSavePrivacy}
                             disabled={saving}
                             activeOpacity={0.8}
-                            className="mt-2">
+                            className="mt-3"
+                            style={{ borderRadius: 14, overflow: 'hidden' }}>
                             <LinearGradient
-                                colors={saving ? ['#d1d5db', '#d1d5db'] : ['#8b5cf6', '#a78bfa']}
-                                className="rounded-xl py-4 items-center flex-row justify-center">
+                                colors={
+                                    saving
+                                        ? ['#d1d5db', '#d1d5db']
+                                        : ['#064e3b', '#059669']
+                                }
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={{
+                                    borderRadius: 14,
+                                    paddingVertical: 14,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
                                 {saving && (
                                     <ActivityIndicator
                                         size="small"
@@ -484,7 +1032,11 @@ const SettingsScreen = ({ navigation }) => {
                                         style={{ marginRight: 8 }}
                                     />
                                 )}
-                                <Icon name="content-save-outline" size={20} color="#fff" />
+                                <Icon
+                                    name="content-save-outline"
+                                    size={18}
+                                    color="#fff"
+                                />
                                 <Text className="text-white font-bold text-base ml-2">
                                     {saving ? 'Saving...' : 'Save Privacy Settings'}
                                 </Text>
@@ -495,22 +1047,47 @@ const SettingsScreen = ({ navigation }) => {
             </SectionCard>
 
             {/* Data Management Section */}
-            <SectionCard title="Data Management" icon="database-outline" iconColor="#ef4444">
+            <SectionCard
+                title="Data Management"
+                icon="database-outline"
+                iconColor="#ef4444">
                 <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => Alert.alert('Download Data', 'Your data export will be sent to your email.')}
-                    className="flex-row items-center bg-white rounded-xl p-4 mb-3 shadow-sm"
-                    style={{ elevation: 2 }}>
-                    <View className="w-10 h-10 rounded-lg bg-blue-50 justify-center items-center">
+                    onPress={() =>
+                        Alert.alert(
+                            'Download Data',
+                            'Your data export will be sent to your email.',
+                        )
+                    }
+                    className="flex-row items-center bg-white rounded-2xl p-4 mb-3 shadow-sm"
+                    style={{
+                        elevation: 2,
+                        borderLeftWidth: 3,
+                        borderLeftColor: '#3b82f6',
+                    }}>
+                    <LinearGradient
+                        colors={['#dbeafe20', '#eff6ff10']}
+                        className="w-11 h-11 rounded-xl justify-center items-center"
+                        style={{ borderRadius: 12 }}>
                         <Icon name="download" size={20} color="#3b82f6" />
-                    </View>
-                    <View className="ml-3 flex-1">
-                        <Text className="text-gray-900 font-semibold text-sm">Download My Data</Text>
+                    </LinearGradient>
+                    <View className="ml-3.5 flex-1">
+                        <Text className="text-gray-900 font-bold text-sm">
+                            Download My Data
+                        </Text>
                         <Text className="text-gray-400 text-xs mt-0.5">
                             Export all your personal data
                         </Text>
                     </View>
-                    <Icon name="chevron-right" size={20} color="#d1d5db" />
+                    <View
+                        className="w-8 h-8 rounded-full justify-center items-center"
+                        style={{ backgroundColor: '#f3f4f6' }}>
+                        <Icon
+                            name="chevron-right"
+                            size={18}
+                            color="#9ca3af"
+                        />
+                    </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -521,101 +1098,278 @@ const SettingsScreen = ({ navigation }) => {
                             'Are you sure you want to delete your account? This action cannot be undone.',
                             [
                                 { text: 'Cancel', style: 'cancel' },
-                                { text: 'Delete', style: 'destructive', onPress: () => { } },
+                                {
+                                    text: 'Delete',
+                                    style: 'destructive',
+                                    onPress: () => { },
+                                },
                             ],
                         )
                     }
-                    className="flex-row items-center bg-white rounded-xl p-4 mb-3 border border-red-200 shadow-sm"
-                    style={{ elevation: 2 }}>
-                    <View className="w-10 h-10 rounded-lg bg-red-50 justify-center items-center">
+                    className="flex-row items-center rounded-2xl p-4 mb-3 shadow-sm"
+                    style={{
+                        elevation: 2,
+                        borderLeftWidth: 3,
+                        borderLeftColor: '#ef4444',
+                        backgroundColor: '#fef2f2',
+                        borderWidth: 1.5,
+                        borderColor: '#fecaca',
+                    }}>
+                    <LinearGradient
+                        colors={['#fee2e220', '#fef2f210']}
+                        className="w-11 h-11 rounded-xl justify-center items-center"
+                        style={{ borderRadius: 12 }}>
                         <Icon name="delete-outline" size={20} color="#ef4444" />
-                    </View>
-                    <View className="ml-3 flex-1">
-                        <Text className="text-red-500 font-semibold text-sm">Delete My Account</Text>
-                        <Text className="text-gray-400 text-xs mt-0.5">
+                    </LinearGradient>
+                    <View className="ml-3.5 flex-1">
+                        <Text className="text-red-500 font-bold text-sm">
+                            Delete My Account
+                        </Text>
+                        <Text className="text-red-400 text-xs mt-0.5">
                             Permanently remove your account and data
                         </Text>
                     </View>
-                    <Icon name="chevron-right" size={20} color="#fca5a5" />
+                    <View
+                        className="w-8 h-8 rounded-full justify-center items-center"
+                        style={{ backgroundColor: '#fee2e2' }}>
+                        <Icon
+                            name="chevron-right"
+                            size={18}
+                            color="#fca5a5"
+                        />
+                    </View>
                 </TouchableOpacity>
+
+                {/* Warning Box */}
+                <View
+                    className="rounded-2xl p-4 flex-row items-start"
+                    style={{
+                        backgroundColor: '#fef2f2',
+                        borderWidth: 1,
+                        borderColor: '#fecaca',
+                    }}>
+                    <View
+                        className="w-7 h-7 rounded-lg justify-center items-center mr-3 mt-0.5"
+                        style={{ backgroundColor: '#fee2e2' }}>
+                        <Icon
+                            name="alert-outline"
+                            size={16}
+                            color="#dc2626"
+                        />
+                    </View>
+                    <View className="flex-1">
+                        <Text className="text-red-800 font-bold text-xs mb-1">
+                            WARNING
+                        </Text>
+                        <Text className="text-red-700 text-xs leading-4">
+                            Deleting your account is permanent and cannot be undone.
+                            All your data, including membership history, session records,
+                            and personal information will be permanently removed.
+                        </Text>
+                    </View>
+                </View>
             </SectionCard>
         </View>
     );
 
+    // ═══════════════════════════════════════════════
+    // ─── LOADING STATE (Dashboard Style) ───
+    // ═══════════════════════════════════════════════
+    if (loading) {
+        return (
+            <View className="flex-1 bg-gray-50 justify-center items-center">
+                <View className="w-16 h-16 rounded-2xl bg-emerald-50 justify-center items-center mb-4">
+                    <ActivityIndicator size="large" color="#059669" />
+                </View>
+                <Text className="text-gray-900 font-bold text-base">
+                    Loading Settings
+                </Text>
+                <Text className="text-gray-400 mt-1 text-sm">
+                    Preparing your preferences...
+                </Text>
+            </View>
+        );
+    }
+
     return (
-        <ScrollView
-            className="flex-1 bg-gray-50"
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    colors={['#059669']}
-                />
-            }>
-            {/* ─── Header ─── */}
-            <LinearGradient
-                colors={['#059669', '#10b981']}
-                className="px-6 pt-12 pb-8 rounded-b-[30px]">
-                <View className="flex-row justify-between items-center mb-4">
-                    <View className="flex-row items-center">
+        <View className="flex-1 bg-gray-50">
+            <ScrollView
+                className="flex-1"
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={['#059669']}
+                        tintColor="#059669"
+                    />
+                }>
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── HEADER WITH GRADIENT (Dashboard Style) ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <LinearGradient
+                    colors={['#064e3b', '#059669', '#10b981']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{
+                        paddingTop: 48,
+                        paddingBottom: 40,
+                        borderBottomLeftRadius: 32,
+                        borderBottomRightRadius: 32,
+                    }}>
+                    {/* Top Bar */}
+                    <View className="flex-row justify-between items-center px-5 mb-5">
                         <DrawerMenuButton />
-                        <View className="ml-2">
-                            <Text className="text-white font-bold text-2xl">Settings</Text>
-                            <Text className="text-white/80 text-sm">
-                                Manage your account preferences
-                            </Text>
+                        <View className="flex-row items-center">
+                            <TouchableOpacity
+                                onPress={onRefresh}
+                                disabled={refreshing}
+                                className="w-10 h-10 bg-white/15 rounded-full justify-center items-center"
+                                style={{
+                                    borderWidth: 1,
+                                    borderColor: 'rgba(255,255,255,0.1)',
+                                }}>
+                                <Icon
+                                    name="refresh"
+                                    size={20}
+                                    color="#fff"
+                                    style={
+                                        refreshing
+                                            ? { transform: [{ rotate: '45deg' }] }
+                                            : undefined
+                                    }
+                                />
+                            </TouchableOpacity>
                         </View>
                     </View>
-                    <TouchableOpacity
-                        onPress={onRefresh}
-                        disabled={loading}
-                        className="w-10 h-10 bg-white/20 rounded-full justify-center items-center">
-                        <Icon
-                            name="refresh"
-                            size={22}
-                            color="#fff"
-                            style={loading ? { transform: [{ rotate: '45deg' }] } : undefined}
+
+                    {/* Settings Header Content */}
+                    <View className="px-5">
+                        <View className="flex-row items-center mb-2">
+                            <View
+                                className="w-12 h-12 rounded-2xl justify-center items-center mr-4"
+                                style={{
+                                    backgroundColor: 'rgba(255,255,255,0.15)',
+                                    borderWidth: 1,
+                                    borderColor: 'rgba(255,255,255,0.1)',
+                                }}>
+                                <Icon name="cog" size={24} color="#fff" />
+                            </View>
+                            <View className="flex-1">
+                                <Text className="text-white font-bold text-2xl">
+                                    Settings
+                                </Text>
+                                <Text className="text-white/60 text-sm mt-0.5 font-medium">
+                                    Manage your account preferences
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Quick Settings Info Bar */}
+                    <View
+                        className="mx-5 mt-4 bg-white/10 rounded-2xl p-4"
+                        style={{
+                            borderWidth: 1,
+                            borderColor: 'rgba(255,255,255,0.1)',
+                        }}>
+                        <View className="flex-row items-center justify-between">
+                            <View className="flex-1 items-center">
+                                <View className="w-8 h-8 bg-green-400/20 rounded-lg justify-center items-center mb-1.5">
+                                    <Icon
+                                        name="shield-check"
+                                        size={14}
+                                        color="#4ade80"
+                                    />
+                                </View>
+                                <Text className="text-white/50 text-[10px] font-semibold uppercase">
+                                    2FA
+                                </Text>
+                                <Text className="text-white font-bold text-xs mt-0.5">
+                                    {twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                                </Text>
+                            </View>
+                            <View className="w-px h-10 bg-white/10" />
+                            <View className="flex-1 items-center">
+                                <View className="w-8 h-8 bg-blue-400/20 rounded-lg justify-center items-center mb-1.5">
+                                    <Icon
+                                        name="bell-outline"
+                                        size={14}
+                                        color="#60a5fa"
+                                    />
+                                </View>
+                                <Text className="text-white/50 text-[10px] font-semibold uppercase">
+                                    Push
+                                </Text>
+                                <Text className="text-white font-bold text-xs mt-0.5">
+                                    {notifications.push ? 'On' : 'Off'}
+                                </Text>
+                            </View>
+                            <View className="w-px h-10 bg-white/10" />
+                            <View className="flex-1 items-center">
+                                <View className="w-8 h-8 bg-purple-400/20 rounded-lg justify-center items-center mb-1.5">
+                                    <Icon
+                                        name="email-outline"
+                                        size={14}
+                                        color="#a78bfa"
+                                    />
+                                </View>
+                                <Text className="text-white/50 text-[10px] font-semibold uppercase">
+                                    Email
+                                </Text>
+                                <Text className="text-white font-bold text-xs mt-0.5">
+                                    {notifications.email ? 'On' : 'Off'}
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                </LinearGradient>
+
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── TAB NAVIGATION (Dashboard Style) ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <View className="px-4 -mt-5">
+                    <View
+                        className="bg-gray-100 rounded-2xl p-1.5 flex-row shadow-md"
+                        style={{
+                            elevation: 4,
+                            borderWidth: 1,
+                            borderColor: '#f3f4f6',
+                        }}>
+                        <TabButton
+                            label="Security"
+                            icon="lock-outline"
+                            isActive={activeTab === 'security'}
+                            onPress={() => setActiveTab('security')}
                         />
-                    </TouchableOpacity>
+                        <TabButton
+                            label="Alerts"
+                            icon="bell-outline"
+                            isActive={activeTab === 'notifications'}
+                            onPress={() => setActiveTab('notifications')}
+                        />
+                        <TabButton
+                            label="Privacy"
+                            icon="eye-outline"
+                            isActive={activeTab === 'privacy'}
+                            onPress={() => setActiveTab('privacy')}
+                        />
+                    </View>
                 </View>
-            </LinearGradient>
 
-            {/* ─── Tab Selector ─── */}
-            <View className="px-4 -mt-5">
-                <View
-                    className="bg-white rounded-2xl p-1.5 flex-row shadow-md"
-                    style={{ elevation: 4 }}>
-                    <TabButton
-                        label="Security"
-                        icon="lock-outline"
-                        isActive={activeTab === 'security'}
-                        onPress={() => setActiveTab('security')}
-                    />
-                    <TabButton
-                        label="Alerts"
-                        icon="bell-outline"
-                        isActive={activeTab === 'notifications'}
-                        onPress={() => setActiveTab('notifications')}
-                    />
-                    <TabButton
-                        label="Privacy"
-                        icon="eye-outline"
-                        isActive={activeTab === 'privacy'}
-                        onPress={() => setActiveTab('privacy')}
-                    />
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── TAB CONTENT ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <View className="px-4 mt-6">
+                    {activeTab === 'security' && renderSecurityTab()}
+                    {activeTab === 'notifications' && renderNotificationsTab()}
+                    {activeTab === 'privacy' && renderPrivacyTab()}
                 </View>
-            </View>
 
-            {/* ─── Tab Content ─── */}
-            <View className="px-4 mt-6">
-                {activeTab === 'security' && renderSecurityTab()}
-                {activeTab === 'notifications' && renderNotificationsTab()}
-                {activeTab === 'privacy' && renderPrivacyTab()}
-            </View>
-
-            {/* Bottom Spacing */}
-            <View className="h-8" />
-        </ScrollView>
+                {/* Bottom Spacing */}
+                <View className="h-8" />
+            </ScrollView>
+        </View>
     );
 };
 

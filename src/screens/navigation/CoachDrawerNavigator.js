@@ -5,12 +5,11 @@ import CustomDrawerContent from '../../components/CustomDrawerContent';
 
 // Coach Screens
 import CoachDashboardScreen from '../coach/CoachDashboardScreen';
+import CoachScheduleScreen from '../coach/CoachScheduleScreen';
 import SessionsScreen from '../coach/SessionsScreen';
 import CreateEditSessionScreen from '../coach/CreateEditSessionScreen';
 import AttendanceScreen from '../coach/AttendanceScreen';
 import CoachAttendanceScreen from '../coach/CoachAttendanceScreen';
-import TraineesScreen from '../coach/TraineesScreen';
-import TraineeProfileScreen from '../coach/TraineeProfileScreen';
 import MembersScreen from '../coach/MembersScreen';
 import MemberProfileScreen from '../coach/MemberProfileScreen';
 import CoachProfileScreen from '../coach/CoachProfileScreen';
@@ -41,14 +40,6 @@ const TrainingPlansStack = () => (
     </Stack.Navigator>
 );
 
-// Stack navigator for Trainees (Trainees → TraineeProfile)
-const TraineesStack = () => (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="TraineesList" component={TraineesScreen} />
-        <Stack.Screen name="TraineeProfile" component={TraineeProfileScreen} />
-    </Stack.Navigator>
-);
-
 // Stack navigator for Members (Members → MemberProfile)
 const MembersStack = () => (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -66,6 +57,12 @@ const COACH_DRAWER_ITEMS = [
         description: 'Overview & quick stats',
     },
     {
+        routeName: 'Schedule',
+        label: 'Schedule',
+        icon: 'calendar-week',
+        description: 'Weekly schedule overview',
+    },
+    {
         routeName: 'Sessions',
         label: 'Sessions',
         icon: 'calendar-clock',
@@ -81,7 +78,7 @@ const COACH_DRAWER_ITEMS = [
         routeName: 'Attendance',
         label: 'Attendance',
         icon: 'clipboard-check-outline',
-        description: 'Track member attendance',
+        description: 'My & member attendance',
     },
     {
         routeName: 'Announcements',
@@ -100,12 +97,6 @@ const COACH_DRAWER_ITEMS = [
         label: 'Incident Reports',
         icon: 'alert-octagon',
         description: 'Report & track incidents',
-    },
-    {
-        routeName: 'Trainees',
-        label: 'Trainees',
-        icon: 'account-group',
-        description: 'View & manage trainees',
     },
     {
         routeName: 'Members',
@@ -157,13 +148,13 @@ const CoachDrawerNavigator = () => {
                 swipeEdgeWidth: 50,
             }}>
             <Drawer.Screen name="Dashboard" component={CoachDashboardScreen} />
+            <Drawer.Screen name="Schedule" component={CoachScheduleScreen} />
             <Drawer.Screen name="Sessions" component={SessionsStack} />
             <Drawer.Screen name="TrainingPlans" component={TrainingPlansStack} />
             <Drawer.Screen name="Attendance" component={CoachAttendanceScreen} />
             <Drawer.Screen name="Announcements" component={CoachAnnouncementsScreen} />
             <Drawer.Screen name="Reports" component={CoachReportsScreen} />
             <Drawer.Screen name="IncidentReports" component={IncidentReportsScreen} />
-            <Drawer.Screen name="Trainees" component={TraineesStack} />
             <Drawer.Screen name="Members" component={MembersStack} />
             <Drawer.Screen name="Profile" component={CoachProfileScreen} />
             <Drawer.Screen name="Settings" component={CoachSettingsScreen} />

@@ -9,6 +9,7 @@ import SportsScreen from '../member/SportsScreen';
 import BookSessionScreen from '../member/BookSessionScreen';
 import MySessionsScreen from '../member/MySessionsScreen';
 import AttendanceScreen from '../member/AttendanceScreen';
+import EventsScreen from '../member/EventsScreen';
 import ProgressScreen from '../member/ProgressScreen';
 import ProfileScreen from '../member/ProfileScreen';
 import MembershipScreen from '../member/MembershipScreen';
@@ -74,11 +75,17 @@ const MEMBER_DRAWER_ITEMS = [
         description: 'Punch in/out & history',
     },
     {
-        routeName: 'Progress',
-        label: 'My Progress',
-        icon: 'chart-line',
-        description: 'Track your fitness journey',
+        routeName: 'Events',
+        label: 'Events',
+        icon: 'calendar-star',
+        description: 'Upcoming events & activities',
     },
+    // {
+    //     routeName: 'Progress',
+    //     label: 'My Progress',
+    //     icon: 'chart-line',
+    //     description: 'Track your fitness journey',
+    // },
     {
         routeName: 'HealthSafety',
         label: 'Health & Safety',
@@ -141,7 +148,8 @@ const MemberDrawerNavigator = () => {
             <Drawer.Screen name="Sports" component={SportsStack} />
             <Drawer.Screen name="MySessions" component={MySessionsScreen} />
             <Drawer.Screen name="Attendance" component={AttendanceScreen} />
-            <Drawer.Screen name="Progress" component={ProgressScreen} />
+            <Drawer.Screen name="Events" component={EventsScreen} />
+            {/* <Drawer.Screen name="Progress" component={ProgressScreen} /> */}
             <Drawer.Screen name="HealthSafety" component={HealthSafetyScreen} />
             <Drawer.Screen name="Feedback" component={FeedbackScreen} />
             <Drawer.Screen name="Profile" component={ProfileScreen} />

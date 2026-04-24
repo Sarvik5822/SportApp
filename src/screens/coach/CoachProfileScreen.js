@@ -10,12 +10,16 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
+import { launchImageLibrary } from 'react-native-image-picker';
 import ProfileAvatar from '../../components/ProfileAvatar';
 import DrawerMenuButton from '../../components/DrawerMenuButton';
 import { coachProfile } from '../../data/user';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // ─── Extended Coach Data (simulating full profile from API) ───
 const EXTENDED_COACH_DATA = {
@@ -48,14 +52,14 @@ const EXTENDED_COACH_DATA = {
 };
 
 const AVATAR_OPTIONS = [
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Coach',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Trainer',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Instructor',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Teacher',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Mentor',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Guide',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Expert',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=Sarah&size=200',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=Coach&size=200',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=Trainer&size=200',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=Instructor&size=200',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=Teacher&size=200',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=Mentor&size=200',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=Guide&size=200',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=Expert&size=200',
 ];
 
 // ─── Helper Functions ───
@@ -69,77 +73,147 @@ const formatDate = dateStr => {
 };
 
 // ─── Reusable Components ───
-const InfoRow = ({ icon, label, value, iconColor = '#1e3a8a' }) => (
-  <View className="flex-row items-center py-3 border-b border-gray-100">
-    <View
-      className="w-10 h-10 rounded-lg justify-center items-center"
-      style={{ backgroundColor: `${iconColor}15` }}>
+const InfoRow = ({ icon, label, value, iconColor = '#1e3a8a', gradient }) => (
+  <View className="flex-row items-center py-3.5 border-b border-gray-50">
+    <LinearGradient
+      colors={gradient || [`${iconColor}20`, `${iconColor}10`]}
+      className="w-11 h-11 rounded-xl justify-center items-center"
+      style={{ borderRadius: 12 }}>
       <Icon name={icon} size={20} color={iconColor} />
-    </View>
-    <View className="flex-1 ml-3">
-      <Text className="text-gray-400 text-xs">{label}</Text>
-      <Text className="text-gray-800 font-medium text-sm">{value || 'Not provided'}</Text>
+    </LinearGradient>
+    <View className="flex-1 ml-3.5">
+      <Text className="text-gray-400 text-[11px] font-semibold uppercase tracking-wider">
+        {label}
+      </Text>
+      <Text className="text-gray-800 font-bold text-sm mt-0.5">
+        {value || 'Not provided'}
+      </Text>
     </View>
   </View>
 );
 
-const Section = ({ title, icon, children, rightElement }) => (
-  <View className="bg-white rounded-2xl p-4 mb-4 shadow-md" style={{ elevation: 3 }}>
-    <View className="flex-row items-center justify-between mb-4">
-      <View className="flex-row items-center">
-        <View
-          className="w-8 h-8 rounded-lg justify-center items-center"
-          style={{ backgroundColor: '#1e3a8a15' }}>
-          <Icon name={icon} size={18} color="#1e3a8a" />
-        </View>
-        <Text className="text-gray-900 font-bold text-lg ml-2">{title}</Text>
+const SectionTitle = ({ title, icon, iconColor = '#1e3a8a', rightElement }) => (
+  <View className="flex-row items-center justify-between mb-4">
+    <View className="flex-row items-center">
+      <View
+        className="w-8 h-8 rounded-lg justify-center items-center mr-2.5"
+        style={{ backgroundColor: `${iconColor}12` }}>
+        <Icon name={icon} size={16} color={iconColor} />
       </View>
-      {rightElement}
+      <Text className="text-gray-900 font-bold text-lg">{title}</Text>
     </View>
+    {rightElement}
+  </View>
+);
+
+const Section = ({ title, icon, children, rightElement, iconColor = '#1e3a8a' }) => (
+  <View
+    className="bg-white rounded-2xl p-5 mb-4 shadow-md"
+    style={{ elevation: 3 }}>
+    <SectionTitle title={title} icon={icon} iconColor={iconColor} rightElement={rightElement} />
     {children}
   </View>
 );
 
 const BadgeComponent = ({ text, variant = 'default' }) => {
   const variants = {
-    default: { bg: '#1e3a8a', textColor: '#ffffff' },
-    secondary: { bg: '#e5e7eb', textColor: '#374151' },
-    outline: { bg: 'transparent', textColor: '#1e3a8a', border: '#1e3a8a' },
-    success: { bg: '#dcfce7', textColor: '#166534' },
-    warning: { bg: '#fef3c7', textColor: '#92400e' },
-    destructive: { bg: '#fee2e2', textColor: '#991b1b' },
+    default: { colors: ['#1e3a8a', '#3b82f6'], textColor: '#ffffff' },
+    secondary: { colors: ['#e5e7eb', '#f3f4f6'], textColor: '#374151' },
+    outline: { colors: ['transparent', 'transparent'], textColor: '#1e3a8a', border: '#1e3a8a' },
+    success: { colors: ['#dcfce7', '#f0fdf4'], textColor: '#166534' },
+    warning: { colors: ['#fef3c7', '#fffbeb'], textColor: '#92400e' },
+    destructive: { colors: ['#fee2e2', '#fef2f2'], textColor: '#991b1b' },
   };
   const style = variants[variant] || variants.default;
 
+  if (variant === 'outline') {
+    return (
+      <View
+        className="px-3.5 py-2 rounded-full mr-2 mb-2"
+        style={{
+          borderWidth: 1.5,
+          borderColor: style.border || '#1e3a8a',
+          backgroundColor: '#1e3a8a08',
+        }}>
+        <Text className="text-xs font-bold" style={{ color: style.textColor }}>
+          {text}
+        </Text>
+      </View>
+    );
+  }
+
   return (
-    <View
-      className="px-3 py-1.5 rounded-full mr-2 mb-2"
-      style={{
-        backgroundColor: style.bg,
-        borderWidth: style.border ? 1 : 0,
-        borderColor: style.border || 'transparent',
-      }}>
-      <Text className="text-xs font-semibold" style={{ color: style.textColor }}>
+    <LinearGradient
+      colors={style.colors}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      className="px-3.5 py-2 rounded-full mr-2 mb-2"
+      style={{ borderRadius: 20 }}>
+      <Text className="text-xs font-bold" style={{ color: style.textColor }}>
         {text}
       </Text>
-    </View>
+    </LinearGradient>
   );
 };
 
-const TabButton = ({ label, isActive, onPress }) => (
+const TabButton = ({ label, icon, isActive, onPress }) => (
   <TouchableOpacity
     onPress={onPress}
     activeOpacity={0.7}
-    className={`flex-1 py-3 items-center rounded-xl ${isActive ? '' : ''}`}
+    className="flex-1 py-3 items-center rounded-xl"
     style={{
-      backgroundColor: isActive ? '#1e3a8a' : 'transparent',
+      backgroundColor: isActive ? undefined : 'transparent',
+      overflow: 'hidden',
     }}>
-    <Text
-      className="text-xs font-bold"
-      style={{ color: isActive ? '#ffffff' : '#6b7280' }}>
+    {isActive ? (
+      <LinearGradient
+        colors={['#1e3a8a', '#3b82f6']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          borderRadius: 12,
+        }}
+      />
+    ) : null}
+    <View className="flex-row items-center">
+      <Icon
+        name={icon}
+        size={14}
+        color={isActive ? '#ffffff' : '#9ca3af'}
+        style={{ marginRight: 4 }}
+      />
+      <Text
+        className="text-xs font-bold"
+        style={{ color: isActive ? '#ffffff' : '#9ca3af' }}>
+        {label}
+      </Text>
+    </View>
+  </TouchableOpacity>
+);
+
+const CircularStat = ({ value, label, color, suffix = '' }) => (
+  <View className="items-center flex-1">
+    <View
+      className="w-16 h-16 rounded-full justify-center items-center mb-2"
+      style={{
+        backgroundColor: `${color}12`,
+        borderWidth: 3,
+        borderColor: `${color}30`,
+      }}>
+      <Text className="font-bold text-lg" style={{ color }}>
+        {value}
+        {suffix}
+      </Text>
+    </View>
+    <Text className="text-gray-500 text-[11px] text-center font-medium">
       {label}
     </Text>
-  </TouchableOpacity>
+  </View>
 );
 
 // ═══════════════════════════════════════════════
@@ -184,7 +258,6 @@ const CoachProfileScreen = ({ navigation }) => {
   };
 
   const handleCancel = () => {
-    // Reset form data to original
     setFormData({
       name: EXTENDED_COACH_DATA.name || '',
       phone: EXTENDED_COACH_DATA.phone || '',
@@ -212,6 +285,29 @@ const CoachProfileScreen = ({ navigation }) => {
     setShowAvatarModal(false);
   };
 
+  const handlePickFromGallery = () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 0.8,
+      maxWidth: 500,
+      maxHeight: 500,
+      selectionLimit: 1,
+    };
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        return;
+      }
+      if (response.errorCode) {
+        Alert.alert('Error', response.errorMessage || 'Failed to pick image');
+        return;
+      }
+      if (response.assets && response.assets.length > 0) {
+        const pickedUri = response.assets[0].uri;
+        setSelectedAvatar(pickedUri);
+      }
+    });
+  };
+
   const getApprovalBadgeVariant = status => {
     switch (status) {
       case 'approved':
@@ -223,90 +319,107 @@ const CoachProfileScreen = ({ navigation }) => {
     }
   };
 
+  // ─── Edit Field Component ───
+  const EditField = ({ label, value, onChangeText, placeholder, multiline, numberOfLines, keyboardType, disabled, disabledValue }) => (
+    <View className="mb-4">
+      <Text className="text-gray-400 text-[11px] mb-2 font-bold uppercase tracking-wider">
+        {label}
+      </Text>
+      {disabled ? (
+        <View className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3.5">
+          <Text className="text-gray-400 text-sm font-medium">
+            {disabledValue}
+          </Text>
+        </View>
+      ) : (
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-800 text-sm font-medium"
+          placeholder={placeholder}
+          placeholderTextColor="#d1d5db"
+          multiline={multiline}
+          numberOfLines={numberOfLines}
+          textAlignVertical={multiline ? 'top' : 'center'}
+          keyboardType={keyboardType}
+          style={multiline ? { minHeight: 120 } : undefined}
+        />
+      )}
+    </View>
+  );
+
   // ─── Tab Content Renderers ───
   const renderPersonalTab = () => (
-    <Section title="Personal Information" icon="account">
+    <Section title="Personal Information" icon="account" iconColor="#3b82f6">
       <View className="space-y-1">
         {isEditing ? (
           <>
-            <View className="mb-4">
-              <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                Full Name
-              </Text>
-              <TextInput
-                value={formData.name}
-                onChangeText={text =>
-                  setFormData({ ...formData, name: text })
-                }
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm"
-                placeholder="Enter your name"
-                placeholderTextColor="#9ca3af"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                Email Address
-              </Text>
-              <View className="bg-gray-100 border border-gray-200 rounded-xl px-4 py-3">
-                <Text className="text-gray-400 text-sm">
-                  {coachData.email}
-                </Text>
-              </View>
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                Phone Number
-              </Text>
-              <TextInput
-                value={formData.phone}
-                onChangeText={text =>
-                  setFormData({ ...formData, phone: text })
-                }
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm"
-                placeholder="Enter phone number"
-                placeholderTextColor="#9ca3af"
-                keyboardType="phone-pad"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                Branch
-              </Text>
-              <View className="bg-gray-100 border border-gray-200 rounded-xl px-4 py-3">
-                <Text className="text-gray-400 text-sm">
-                  {coachData.branch?.name || 'Not assigned'}
-                </Text>
-              </View>
-            </View>
-            <View className="mb-2">
-              <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                Address
-              </Text>
-              <TextInput
-                value={formData.address}
-                onChangeText={text =>
-                  setFormData({ ...formData, address: text })
-                }
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm"
-                placeholder="Enter your address"
-                placeholderTextColor="#9ca3af"
-              />
-            </View>
+            <EditField
+              label="Full Name"
+              value={formData.name}
+              onChangeText={text => setFormData({ ...formData, name: text })}
+              placeholder="Enter your name"
+            />
+            <EditField
+              label="Email Address"
+              disabled
+              disabledValue={coachData.email}
+            />
+            <EditField
+              label="Phone Number"
+              value={formData.phone}
+              onChangeText={text => setFormData({ ...formData, phone: text })}
+              placeholder="Enter phone number"
+              keyboardType="phone-pad"
+            />
+            <EditField
+              label="Branch"
+              disabled
+              disabledValue={coachData.branch?.name || 'Not assigned'}
+            />
+            <EditField
+              label="Address"
+              value={formData.address}
+              onChangeText={text => setFormData({ ...formData, address: text })}
+              placeholder="Enter your address"
+            />
           </>
         ) : (
           <>
-            <InfoRow icon="account" label="Full Name" value={formData.name} />
-            <InfoRow icon="email" label="Email" value={coachData.email} />
-            <InfoRow icon="phone" label="Phone" value={formData.phone} />
+            <InfoRow
+              icon="account"
+              label="Full Name"
+              value={formData.name}
+              iconColor="#3b82f6"
+              gradient={['#dbeafe', '#eff6ff']}
+            />
+            <InfoRow
+              icon="email"
+              label="Email"
+              value={coachData.email}
+              iconColor="#8b5cf6"
+              gradient={['#ede9fe', '#f5f3ff']}
+            />
+            <InfoRow
+              icon="phone"
+              label="Phone"
+              value={formData.phone}
+              iconColor="#22c55e"
+              gradient={['#dcfce7', '#f0fdf4']}
+            />
             <InfoRow
               icon="office-building"
               label="Branch"
               value={coachData.branch?.name || 'Not assigned'}
+              iconColor="#f59e0b"
+              gradient={['#fef3c7', '#fffbeb']}
             />
             <InfoRow
               icon="map-marker"
               label="Address"
               value={formData.address}
+              iconColor="#ec4899"
+              gradient={['#fce7f3', '#fdf2f8']}
             />
           </>
         )}
@@ -315,84 +428,64 @@ const CoachProfileScreen = ({ navigation }) => {
   );
 
   const renderProfessionalTab = () => (
-    <Section title="Professional Profile" icon="certificate">
+    <Section title="Professional Profile" icon="certificate" iconColor="#8b5cf6">
       <View className="space-y-1">
         {isEditing ? (
           <>
-            <View className="mb-4">
-              <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                Bio
-              </Text>
-              <TextInput
-                value={formData.bio}
-                onChangeText={text =>
-                  setFormData({ ...formData, bio: text })
-                }
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm"
-                placeholder="Tell us about your experience..."
-                placeholderTextColor="#9ca3af"
-                multiline
-                numberOfLines={5}
-                textAlignVertical="top"
-                style={{ minHeight: 120 }}
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                Specializations (comma separated)
-              </Text>
-              <TextInput
-                value={formData.specializations.join(', ')}
-                onChangeText={text =>
-                  setFormData({
-                    ...formData,
-                    specializations: text
-                      .split(',')
-                      .map(s => s.trim())
-                      .filter(Boolean),
-                  })
-                }
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm"
-                placeholder="e.g., Yoga, Pilates, Meditation"
-                placeholderTextColor="#9ca3af"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                Additional Skills (comma separated)
-              </Text>
-              <TextInput
-                value={formData.additionalSkills.join(', ')}
-                onChangeText={text =>
-                  setFormData({
-                    ...formData,
-                    additionalSkills: text
-                      .split(',')
-                      .map(s => s.trim())
-                      .filter(Boolean),
-                  })
-                }
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm"
-                placeholder="e.g., First Aid, Nutrition"
-                placeholderTextColor="#9ca3af"
-              />
-            </View>
+            <EditField
+              label="Bio"
+              value={formData.bio}
+              onChangeText={text => setFormData({ ...formData, bio: text })}
+              placeholder="Tell us about your experience..."
+              multiline
+              numberOfLines={5}
+            />
+            <EditField
+              label="Specializations (comma separated)"
+              value={formData.specializations.join(', ')}
+              onChangeText={text =>
+                setFormData({
+                  ...formData,
+                  specializations: text
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean),
+                })
+              }
+              placeholder="e.g., Yoga, Pilates, Meditation"
+            />
+            <EditField
+              label="Additional Skills (comma separated)"
+              value={formData.additionalSkills.join(', ')}
+              onChangeText={text =>
+                setFormData({
+                  ...formData,
+                  additionalSkills: text
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean),
+                })
+              }
+              placeholder="e.g., First Aid, Nutrition"
+            />
           </>
         ) : (
           <>
             {/* Bio */}
-            <View className="mb-4">
-              <Text className="text-gray-500 text-xs mb-1 font-semibold">
+            <View className="mb-5">
+              <Text className="text-gray-400 text-[11px] mb-2 font-bold uppercase tracking-wider">
                 Bio
               </Text>
-              <Text className="text-gray-700 text-sm leading-5">
-                {formData.bio || 'No bio added'}
-              </Text>
+              <View className="bg-gray-50 rounded-xl p-4" style={{ borderLeftWidth: 3, borderLeftColor: '#8b5cf6' }}>
+                <Text className="text-gray-700 text-sm leading-5 font-medium">
+                  {formData.bio || 'No bio added'}
+                </Text>
+              </View>
             </View>
 
             {/* Specializations */}
-            <View className="mb-4">
-              <Text className="text-gray-500 text-xs mb-2 font-semibold">
+            <View className="mb-5">
+              <Text className="text-gray-400 text-[11px] mb-3 font-bold uppercase tracking-wider">
                 Specializations
               </Text>
               <View className="flex-row flex-wrap">
@@ -409,8 +502,8 @@ const CoachProfileScreen = ({ navigation }) => {
             </View>
 
             {/* Additional Skills */}
-            <View className="mb-4">
-              <Text className="text-gray-500 text-xs mb-2 font-semibold">
+            <View className="mb-5">
+              <Text className="text-gray-400 text-[11px] mb-3 font-bold uppercase tracking-wider">
                 Additional Skills
               </Text>
               <View className="flex-row flex-wrap">
@@ -431,20 +524,26 @@ const CoachProfileScreen = ({ navigation }) => {
             </View>
 
             {/* Stats */}
-            <View className="flex-row mt-2">
-              <View className="flex-1 bg-blue-50 rounded-xl p-3 mr-2 items-center">
-                <Text className="text-blue-800 font-bold text-xl">
+            <View className="flex-row mt-2" style={{ gap: 10 }}>
+              <View className="flex-1 bg-blue-50 rounded-2xl p-4 items-center">
+                <View className="w-10 h-10 bg-blue-100 rounded-xl justify-center items-center mb-2">
+                  <Icon name="account-group" size={20} color="#3b82f6" />
+                </View>
+                <Text className="text-blue-900 font-bold text-2xl">
                   {coachData.stats?.totalClients || coachData.totalStudents || 0}
                 </Text>
-                <Text className="text-blue-600 text-xs mt-1">
+                <Text className="text-blue-500 text-[11px] mt-1 font-semibold">
                   Total Clients
                 </Text>
               </View>
-              <View className="flex-1 bg-yellow-50 rounded-xl p-3 ml-2 items-center">
-                <Text className="text-yellow-800 font-bold text-xl">
-                  {coachData.rating || 0} / 5.0
+              <View className="flex-1 bg-yellow-50 rounded-2xl p-4 items-center">
+                <View className="w-10 h-10 bg-yellow-100 rounded-xl justify-center items-center mb-2">
+                  <Icon name="star" size={20} color="#f59e0b" />
+                </View>
+                <Text className="text-yellow-900 font-bold text-2xl">
+                  {coachData.rating || 0}
                 </Text>
-                <Text className="text-yellow-600 text-xs mt-1">
+                <Text className="text-yellow-600 text-[11px] mt-1 font-semibold">
                   Avg Rating
                 </Text>
               </View>
@@ -456,56 +555,71 @@ const CoachProfileScreen = ({ navigation }) => {
   );
 
   const renderCertificationsTab = () => (
-    <Section title="Certifications & Qualifications" icon="medal">
+    <Section title="Certifications & Qualifications" icon="medal" iconColor="#f59e0b">
       {isEditing && (
-        <View className="mb-4">
-          <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-            Certifications (comma separated)
-          </Text>
-          <TextInput
-            value={formData.certifications.join(', ')}
-            onChangeText={text =>
-              setFormData({
-                ...formData,
-                certifications: text
-                  .split(',')
-                  .map(s => s.trim())
-                  .filter(Boolean),
-              })
-            }
-            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm"
-            placeholder="e.g., Certified Yoga Instructor, CPR Certified"
-            placeholderTextColor="#9ca3af"
-          />
-        </View>
+        <EditField
+          label="Certifications (comma separated)"
+          value={formData.certifications.join(', ')}
+          onChangeText={text =>
+            setFormData({
+              ...formData,
+              certifications: text
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean),
+            })
+          }
+          placeholder="e.g., Certified Yoga Instructor, CPR Certified"
+        />
       )}
       {formData.certifications.length > 0 ? (
-        formData.certifications.map((cert, index) => (
-          <View
-            key={index}
-            className="flex-row items-center p-3.5 border border-gray-100 rounded-xl mb-2">
+        formData.certifications.map((cert, index) => {
+          const certColors = [
+            { primary: '#3b82f6', gradient: ['#dbeafe', '#eff6ff'] },
+            { primary: '#22c55e', gradient: ['#dcfce7', '#f0fdf4'] },
+            { primary: '#f59e0b', gradient: ['#fef3c7', '#fffbeb'] },
+            { primary: '#8b5cf6', gradient: ['#ede9fe', '#f5f3ff'] },
+          ];
+          const colorSet = certColors[index % certColors.length];
+
+          return (
             <View
-              className="w-10 h-10 rounded-full justify-center items-center"
-              style={{ backgroundColor: '#1e3a8a15' }}>
-              <Icon name="medal" size={20} color="#1e3a8a" />
-            </View>
-            <View className="flex-1 ml-3">
-              <Text className="text-gray-800 font-semibold text-sm">
-                {typeof cert === 'object' ? cert.name : cert}
-              </Text>
-              {typeof cert === 'object' && cert.issuer && (
-                <Text className="text-gray-400 text-xs mt-0.5">
-                  {cert.issuer}
+              key={index}
+              className="flex-row items-center p-4 rounded-2xl mb-3 shadow-sm"
+              style={{
+                elevation: 2,
+                backgroundColor: '#fff',
+                borderLeftWidth: 3,
+                borderLeftColor: colorSet.primary,
+              }}>
+              <LinearGradient
+                colors={colorSet.gradient}
+                className="w-11 h-11 rounded-xl justify-center items-center"
+                style={{ borderRadius: 12 }}>
+                <Icon name="medal" size={20} color={colorSet.primary} />
+              </LinearGradient>
+              <View className="flex-1 ml-3.5">
+                <Text className="text-gray-800 font-bold text-sm">
+                  {typeof cert === 'object' ? cert.name : cert}
                 </Text>
-              )}
+                {typeof cert === 'object' && cert.issuer && (
+                  <Text className="text-gray-400 text-xs mt-0.5 font-medium">
+                    {cert.issuer}
+                  </Text>
+                )}
+              </View>
+              <View className="w-8 h-8 bg-green-50 rounded-full justify-center items-center">
+                <Icon name="check-circle" size={18} color="#22c55e" />
+              </View>
             </View>
-            <Icon name="check-circle" size={20} color="#22c55e" />
-          </View>
-        ))
+          );
+        })
       ) : (
-        <View className="py-8 items-center">
-          <Icon name="medal-outline" size={48} color="#d1d5db" />
-          <Text className="text-gray-400 mt-2 text-sm">
+        <View className="py-10 items-center">
+          <View className="w-16 h-16 rounded-full bg-gray-50 justify-center items-center mb-3">
+            <Icon name="medal-outline" size={32} color="#d1d5db" />
+          </View>
+          <Text className="text-gray-400 mt-1 text-sm font-medium">
             No certifications added
           </Text>
         </View>
@@ -516,15 +630,13 @@ const CoachProfileScreen = ({ navigation }) => {
   const renderEmergencyTab = () => (
     <>
       {/* Emergency Contact */}
-      <Section title="Emergency Contact" icon="alert-circle">
+      <Section title="Emergency Contact" icon="alert-circle" iconColor="#dc2626">
         {isEditing ? (
           <>
             <View className="flex-row mb-4">
               <View className="flex-1 mr-2">
-                <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                  Contact Name
-                </Text>
-                <TextInput
+                <EditField
+                  label="Contact Name"
                   value={formData.emergencyContact?.name || ''}
                   onChangeText={text =>
                     setFormData({
@@ -535,16 +647,12 @@ const CoachProfileScreen = ({ navigation }) => {
                       },
                     })
                   }
-                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm"
                   placeholder="Name"
-                  placeholderTextColor="#9ca3af"
                 />
               </View>
               <View className="flex-1 ml-2">
-                <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                  Contact Phone
-                </Text>
-                <TextInput
+                <EditField
+                  label="Contact Phone"
                   value={formData.emergencyContact?.phone || ''}
                   onChangeText={text =>
                     setFormData({
@@ -555,33 +663,25 @@ const CoachProfileScreen = ({ navigation }) => {
                       },
                     })
                   }
-                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm"
                   placeholder="Phone"
-                  placeholderTextColor="#9ca3af"
                   keyboardType="phone-pad"
                 />
               </View>
             </View>
-            <View className="mb-2">
-              <Text className="text-gray-500 text-xs mb-1.5 font-semibold">
-                Relationship
-              </Text>
-              <TextInput
-                value={formData.emergencyContact?.relationship || ''}
-                onChangeText={text =>
-                  setFormData({
-                    ...formData,
-                    emergencyContact: {
-                      ...formData.emergencyContact,
-                      relationship: text,
-                    },
-                  })
-                }
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm"
-                placeholder="e.g., Spouse, Parent, Sibling"
-                placeholderTextColor="#9ca3af"
-              />
-            </View>
+            <EditField
+              label="Relationship"
+              value={formData.emergencyContact?.relationship || ''}
+              onChangeText={text =>
+                setFormData({
+                  ...formData,
+                  emergencyContact: {
+                    ...formData.emergencyContact,
+                    relationship: text,
+                  },
+                })
+              }
+              placeholder="e.g., Spouse, Parent, Sibling"
+            />
           </>
         ) : (
           <>
@@ -590,59 +690,78 @@ const CoachProfileScreen = ({ navigation }) => {
               label="Contact Name"
               value={formData.emergencyContact?.name}
               iconColor="#dc2626"
+              gradient={['#fee2e2', '#fef2f2']}
             />
             <InfoRow
               icon="phone-alert"
               label="Contact Phone"
               value={formData.emergencyContact?.phone}
               iconColor="#dc2626"
+              gradient={['#fee2e2', '#fef2f2']}
             />
             <InfoRow
               icon="heart"
               label="Relationship"
               value={formData.emergencyContact?.relationship}
               iconColor="#dc2626"
+              gradient={['#fee2e2', '#fef2f2']}
             />
           </>
         )}
       </Section>
 
       {/* Availability */}
-      <Section title="Availability Schedule" icon="clock">
+      <Section title="Availability Schedule" icon="clock" iconColor="#22c55e">
         {coachData.availability &&
           Object.keys(coachData.availability).length > 0 ? (
-          Object.entries(coachData.availability).map(([day, times]) => (
-            <View
-              key={day}
-              className="flex-row items-center justify-between p-3 rounded-xl border border-gray-100 mb-2">
-              <View className="flex-row items-center">
-                <View
-                  className="w-8 h-8 rounded-lg justify-center items-center mr-2"
-                  style={{
-                    backgroundColor:
-                      times === 'Off' ? '#fee2e220' : '#dcfce720',
-                  }}>
-                  <Icon
-                    name={times === 'Off' ? 'close-circle' : 'check-circle'}
-                    size={16}
-                    color={times === 'Off' ? '#dc2626' : '#22c55e'}
-                  />
+          Object.entries(coachData.availability).map(([day, times], index) => {
+            const isOff = times === 'Off';
+            return (
+              <View
+                key={day}
+                className="flex-row items-center justify-between p-3.5 rounded-2xl mb-2.5 shadow-sm"
+                style={{
+                  elevation: 1,
+                  backgroundColor: isOff ? '#fef2f2' : '#ffffff',
+                  borderLeftWidth: 3,
+                  borderLeftColor: isOff ? '#ef4444' : '#22c55e',
+                }}>
+                <View className="flex-row items-center">
+                  <View
+                    className="w-9 h-9 rounded-xl justify-center items-center mr-3"
+                    style={{
+                      backgroundColor: isOff ? '#fee2e220' : '#dcfce720',
+                    }}>
+                    <Icon
+                      name={isOff ? 'close-circle' : 'check-circle'}
+                      size={18}
+                      color={isOff ? '#ef4444' : '#22c55e'}
+                    />
+                  </View>
+                  <Text className="font-bold text-gray-800 text-sm capitalize">
+                    {day}
+                  </Text>
                 </View>
-                <Text className="font-semibold text-gray-800 text-sm capitalize">
-                  {day}
-                </Text>
+                <View
+                  className="px-3 py-1.5 rounded-full"
+                  style={{
+                    backgroundColor: isOff ? '#fee2e2' : '#f0fdf4',
+                  }}>
+                  <Text
+                    className="text-xs font-bold"
+                    style={{ color: isOff ? '#dc2626' : '#16a34a' }}>
+                    {typeof times === 'string' ? times : JSON.stringify(times)}
+                  </Text>
+                </View>
               </View>
-              <Text
-                className="text-sm"
-                style={{ color: times === 'Off' ? '#dc2626' : '#6b7280' }}>
-                {typeof times === 'string' ? times : JSON.stringify(times)}
-              </Text>
-            </View>
-          ))
+            );
+          })
         ) : (
-          <View className="py-6 items-center">
-            <Icon name="clock-alert-outline" size={48} color="#d1d5db" />
-            <Text className="text-gray-400 mt-2 text-sm text-center">
+          <View className="py-10 items-center">
+            <View className="w-16 h-16 rounded-full bg-gray-50 justify-center items-center mb-3">
+              <Icon name="clock-alert-outline" size={32} color="#d1d5db" />
+            </View>
+            <Text className="text-gray-400 mt-1 text-sm text-center font-medium">
               No availability set.{'\n'}Update your schedule to set
               availability.
             </Text>
@@ -671,21 +790,30 @@ const CoachProfileScreen = ({ navigation }) => {
     <View className="flex-1 bg-gray-50">
       <ScrollView
         className="flex-1"
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
             colors={['#1e3a8a']}
+            tintColor="#1e3a8a"
           />
         }>
         {/* ═══════════════════════════════════════════════ */}
         {/* ─── HEADER WITH GRADIENT ─── */}
         {/* ═══════════════════════════════════════════════ */}
         <LinearGradient
-          colors={['#1e3a8a', '#3b82f6']}
-          className="px-6 pt-12 pb-16 rounded-b-[30px]">
+          colors={['#0f172a', '#1e3a8a', '#3b82f6']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            paddingTop: 48,
+            paddingBottom: 40,
+            borderBottomLeftRadius: 32,
+            borderBottomRightRadius: 32,
+          }}>
           {/* Top Bar */}
-          <View className="flex-row justify-between items-center mb-6">
+          <View className="flex-row justify-between items-center px-5 mb-6">
             <DrawerMenuButton />
             <Text className="text-white font-bold text-lg">My Profile</Text>
             <TouchableOpacity
@@ -696,7 +824,8 @@ const CoachProfileScreen = ({ navigation }) => {
                   setIsEditing(true);
                 }
               }}
-              className="w-10 h-10 bg-white/20 rounded-full justify-center items-center">
+              className="w-10 h-10 bg-white/15 rounded-full justify-center items-center"
+              style={{ borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
               <Icon
                 name={isEditing ? 'content-save' : 'pencil'}
                 size={20}
@@ -706,7 +835,7 @@ const CoachProfileScreen = ({ navigation }) => {
           </View>
 
           {/* Profile Info */}
-          <View className="items-center">
+          <View className="items-center px-5">
             <TouchableOpacity
               onPress={() => {
                 setSelectedAvatar(currentAvatar);
@@ -714,27 +843,50 @@ const CoachProfileScreen = ({ navigation }) => {
               }}
               activeOpacity={0.8}>
               <View className="relative">
-                <ProfileAvatar
-                  name={coachData.name}
-                  image={currentAvatar || null}
-                  size="xlarge"
-                />
-                <View className="absolute bottom-0 right-0 w-9 h-9 bg-white rounded-full justify-center items-center shadow-md"
-                  style={{ elevation: 4 }}>
-                  <Icon name="camera" size={18} color="#1e3a8a" />
+                <View
+                  style={{
+                    borderWidth: 3,
+                    borderColor: 'rgba(255,255,255,0.25)',
+                    borderRadius: 70,
+                    padding: 3,
+                  }}>
+                  <ProfileAvatar
+                    name={coachData.name}
+                    image={currentAvatar || null}
+                    size="xlarge"
+                  />
                 </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedAvatar(currentAvatar);
+                    setShowAvatarModal(true);
+                  }}
+                  activeOpacity={0.8}
+                  style={{ position: 'absolute', bottom: 4, right: 4 }}>
+                  <LinearGradient
+                    colors={['#ffffff', '#f3f4f6']}
+                    className="w-10 h-10 rounded-full justify-center items-center shadow-lg"
+                    style={{ borderRadius: 20, elevation: 5 }}>
+                    <Icon name="camera" size={20} color="#1e3a8a" />
+                  </LinearGradient>
+                </TouchableOpacity>
               </View>
             </TouchableOpacity>
 
             <Text className="text-white font-bold text-2xl mt-4">
               {coachData.name}
             </Text>
-            <Text className="text-white/80 text-sm">Professional Coach</Text>
+            <View className="flex-row items-center mt-1">
+              <Icon name="shield-star" size={14} color="#fbbf24" />
+              <Text className="text-white/70 text-sm ml-1.5 font-medium">
+                Professional Coach
+              </Text>
+            </View>
 
             {/* Approval Status Badge */}
-            <View className="mt-2">
+            <View className="mt-3">
               <View
-                className="flex-row items-center px-3 py-1.5 rounded-full"
+                className="flex-row items-center px-4 py-2 rounded-full"
                 style={{
                   backgroundColor:
                     coachData.approvalStatus === 'approved'
@@ -755,7 +907,7 @@ const CoachProfileScreen = ({ navigation }) => {
                   }
                 />
                 <Text
-                  className="text-xs font-semibold ml-1 capitalize"
+                  className="text-xs font-bold ml-1.5 capitalize"
                   style={{
                     color:
                       coachData.approvalStatus === 'approved'
@@ -770,20 +922,29 @@ const CoachProfileScreen = ({ navigation }) => {
             </View>
 
             {/* Rating & Experience Pills */}
-            <View className="flex-row mt-4">
-              <View className="bg-white/20 px-4 py-2 rounded-full mr-2">
-                <Text className="text-white font-semibold text-sm">
+            <View className="flex-row mt-4" style={{ gap: 8 }}>
+              <View
+                className="bg-white/10 px-4 py-2.5 rounded-xl flex-row items-center"
+                style={{ borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+                <Icon name="trophy" size={14} color="#fbbf24" />
+                <Text className="text-white font-bold text-sm ml-1.5">
                   {coachData.experience}
                 </Text>
               </View>
-              <View className="bg-yellow-400 px-4 py-2 rounded-full flex-row items-center">
-                <Icon name="star" size={14} color="#fff" />
-                <Text className="text-white font-bold text-sm ml-1">
+              <LinearGradient
+                colors={['#f59e0b', '#fbbf24']}
+                className="px-4 py-2.5 rounded-xl flex-row items-center"
+                style={{ borderRadius: 12 }}>
+                <Icon name="star" size={14} color="#78350f" />
+                <Text className="text-yellow-900 font-bold text-sm ml-1.5">
                   {coachData.rating}
                 </Text>
-              </View>
-              <View className="bg-white/20 px-4 py-2 rounded-full ml-2">
-                <Text className="text-white font-semibold text-sm">
+              </LinearGradient>
+              <View
+                className="bg-white/10 px-4 py-2.5 rounded-xl flex-row items-center"
+                style={{ borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+                <Icon name="calendar-check" size={14} color="#60a5fa" />
+                <Text className="text-white font-bold text-sm ml-1.5">
                   {coachData.stats?.totalSessions || 0} sessions
                 </Text>
               </View>
@@ -799,31 +960,37 @@ const CoachProfileScreen = ({ navigation }) => {
             className="bg-white rounded-2xl p-4 shadow-lg flex-row"
             style={{ elevation: 5 }}>
             <View className="flex-1 items-center border-r border-gray-100">
-              <View className="flex-row items-center">
-                <Icon name="email-outline" size={14} color="#6b7280" />
-                <Text className="text-gray-400 text-xs ml-1">Email</Text>
+              <View className="w-8 h-8 bg-purple-50 rounded-lg justify-center items-center mb-1.5">
+                <Icon name="email-outline" size={14} color="#8b5cf6" />
               </View>
+              <Text className="text-gray-400 text-[10px] font-semibold uppercase">
+                Email
+              </Text>
               <Text
-                className="text-gray-800 font-semibold text-xs mt-1"
+                className="text-gray-800 font-bold text-[11px] mt-0.5"
                 numberOfLines={1}>
                 {coachData.email}
               </Text>
             </View>
             <View className="flex-1 items-center border-r border-gray-100">
-              <View className="flex-row items-center">
-                <Icon name="phone-outline" size={14} color="#6b7280" />
-                <Text className="text-gray-400 text-xs ml-1">Phone</Text>
+              <View className="w-8 h-8 bg-green-50 rounded-lg justify-center items-center mb-1.5">
+                <Icon name="phone-outline" size={14} color="#22c55e" />
               </View>
-              <Text className="text-gray-800 font-semibold text-xs mt-1">
+              <Text className="text-gray-400 text-[10px] font-semibold uppercase">
+                Phone
+              </Text>
+              <Text className="text-gray-800 font-bold text-[11px] mt-0.5">
                 {coachData.phone || 'N/A'}
               </Text>
             </View>
             <View className="flex-1 items-center">
-              <View className="flex-row items-center">
-                <Icon name="calendar-outline" size={14} color="#6b7280" />
-                <Text className="text-gray-400 text-xs ml-1">Joined</Text>
+              <View className="w-8 h-8 bg-blue-50 rounded-lg justify-center items-center mb-1.5">
+                <Icon name="calendar-outline" size={14} color="#3b82f6" />
               </View>
-              <Text className="text-gray-800 font-semibold text-xs mt-1">
+              <Text className="text-gray-400 text-[10px] font-semibold uppercase">
+                Joined
+              </Text>
+              <Text className="text-gray-800 font-bold text-[11px] mt-0.5">
                 {coachData.createdAt
                   ? new Date(coachData.createdAt).toLocaleDateString('en-IN', {
                     month: 'short',
@@ -840,19 +1007,23 @@ const CoachProfileScreen = ({ navigation }) => {
         {/* ═══════════════════════════════════════════════ */}
         {(coachData.twoFactorEnabled || coachData.lastLogin) && (
           <View className="px-4 mt-4">
-            <View className="flex-row">
+            <View className="flex-row" style={{ gap: 8 }}>
               {coachData.twoFactorEnabled && (
-                <View className="flex-row items-center bg-green-50 px-3 py-2 rounded-full mr-2">
+                <View
+                  className="flex-row items-center bg-green-50 px-3.5 py-2.5 rounded-xl"
+                  style={{ borderWidth: 1, borderColor: '#dcfce7' }}>
                   <Icon name="shield-check" size={14} color="#16a34a" />
-                  <Text className="text-green-700 text-xs font-semibold ml-1">
+                  <Text className="text-green-700 text-xs font-bold ml-1.5">
                     2FA Enabled
                   </Text>
                 </View>
               )}
               {coachData.lastLogin && (
-                <View className="flex-row items-center bg-gray-100 px-3 py-2 rounded-full">
+                <View
+                  className="flex-row items-center bg-gray-50 px-3.5 py-2.5 rounded-xl flex-1"
+                  style={{ borderWidth: 1, borderColor: '#f3f4f6' }}>
                   <Icon name="clock-outline" size={14} color="#6b7280" />
-                  <Text className="text-gray-500 text-xs ml-1">
+                  <Text className="text-gray-500 text-xs ml-1.5 font-medium">
                     Last login: {formatDate(coachData.lastLogin)}
                   </Text>
                 </View>
@@ -865,24 +1036,30 @@ const CoachProfileScreen = ({ navigation }) => {
         {/* ─── TAB NAVIGATION ─── */}
         {/* ═══════════════════════════════════════════════ */}
         <View className="px-4 mt-6">
-          <View className="bg-gray-200 rounded-xl p-1 flex-row">
+          <View
+            className="bg-gray-100 rounded-2xl p-1.5 flex-row"
+            style={{ borderWidth: 1, borderColor: '#f3f4f6' }}>
             <TabButton
               label="Personal"
+              icon="account"
               isActive={activeTab === 'personal'}
               onPress={() => setActiveTab('personal')}
             />
             <TabButton
               label="Professional"
+              icon="briefcase"
               isActive={activeTab === 'professional'}
               onPress={() => setActiveTab('professional')}
             />
             <TabButton
               label="Certs"
+              icon="medal"
               isActive={activeTab === 'certifications'}
               onPress={() => setActiveTab('certifications')}
             />
             <TabButton
-              label="Emergency"
+              label="More"
+              icon="dots-horizontal"
               isActive={activeTab === 'emergency'}
               onPress={() => setActiveTab('emergency')}
             />
@@ -899,29 +1076,46 @@ const CoachProfileScreen = ({ navigation }) => {
         {/* ═══════════════════════════════════════════════ */}
         {isEditing && (
           <View className="px-4 mb-4">
-            <View className="flex-row">
+            <View className="flex-row" style={{ gap: 10 }}>
               <TouchableOpacity
                 onPress={handleCancel}
                 activeOpacity={0.7}
-                className="flex-1 mr-2 border border-gray-300 rounded-xl py-3.5 items-center">
-                <Text className="text-gray-600 font-bold text-base">
+                className="flex-1"
+                style={{
+                  borderWidth: 1.5,
+                  borderColor: '#e5e7eb',
+                  borderRadius: 14,
+                  paddingVertical: 14,
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                }}>
+                <Icon name="close" size={18} color="#6b7280" />
+                <Text className="text-gray-600 font-bold text-base ml-2">
                   Cancel
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSave}
                 activeOpacity={0.7}
-                className="flex-1 ml-2 rounded-xl py-3.5 items-center overflow-hidden">
+                className="flex-1 overflow-hidden"
+                style={{ borderRadius: 14 }}>
                 <LinearGradient
                   colors={['#1e3a8a', '#3b82f6']}
-                  className="absolute inset-0"
-                />
-                <View className="flex-row items-center">
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{
+                    paddingVertical: 14,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 14,
+                  }}>
                   <Icon name="content-save" size={18} color="#fff" />
                   <Text className="text-white font-bold text-base ml-2">
                     Save Changes
                   </Text>
-                </View>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>
@@ -948,15 +1142,28 @@ const CoachProfileScreen = ({ navigation }) => {
               ]);
             }}
             activeOpacity={0.7}
-            className="bg-red-500 rounded-xl py-4 items-center flex-row justify-center shadow-md"
-            style={{ elevation: 3 }}>
-            <Icon name="logout" size={20} color="#fff" />
-            <Text className="text-white font-bold text-base ml-2">Logout</Text>
+            style={{ borderRadius: 16, overflow: 'hidden' }}>
+            <LinearGradient
+              colors={['#ef4444', '#dc2626']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{
+                paddingVertical: 16,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 16,
+              }}>
+              <Icon name="logout" size={20} color="#fff" />
+              <Text className="text-white font-bold text-base ml-2">
+                Logout
+              </Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
 
         {/* Bottom Spacing */}
-        <View className="h-6" />
+        <View className="h-8" />
       </ScrollView>
 
       {/* ═══════════════════════════════════════════════ */}
@@ -967,22 +1174,63 @@ const CoachProfileScreen = ({ navigation }) => {
         animationType="slide"
         transparent={true}
         onRequestClose={() => setShowAvatarModal(false)}>
-        <View className="flex-1 bg-black/50 justify-end">
+        <View className="flex-1 bg-black/60 justify-end">
           <View className="bg-white rounded-t-3xl px-6 pt-6 pb-8 max-h-[80%]">
             {/* Modal Header */}
             <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-gray-900 font-bold text-xl">
-                Change Avatar
-              </Text>
+              <View>
+                <Text className="text-gray-900 font-bold text-xl">
+                  Change Avatar
+                </Text>
+                <Text className="text-gray-400 text-sm mt-1">
+                  Select a new avatar for your profile.
+                </Text>
+              </View>
               <TouchableOpacity
                 onPress={() => setShowAvatarModal(false)}
-                className="w-8 h-8 bg-gray-100 rounded-full justify-center items-center">
+                className="w-9 h-9 bg-gray-100 rounded-full justify-center items-center">
                 <Icon name="close" size={18} color="#6b7280" />
               </TouchableOpacity>
             </View>
-            <Text className="text-gray-400 text-sm mb-6">
-              Select a new avatar for your profile.
-            </Text>
+
+            {/* Divider */}
+            <View className="h-px bg-gray-100 my-4" />
+
+            {/* Pick from Gallery Button */}
+            <TouchableOpacity
+              onPress={handlePickFromGallery}
+              activeOpacity={0.7}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f0f9ff',
+                borderWidth: 1.5,
+                borderColor: '#bae6fd',
+                borderRadius: 14,
+                paddingVertical: 14,
+                marginBottom: 16,
+              }}>
+              <Icon name="image-multiple" size={20} color="#0284c7" />
+              <Text
+                style={{
+                  color: '#0284c7',
+                  fontWeight: 'bold',
+                  fontSize: 14,
+                  marginLeft: 8,
+                }}>
+                Pick from Gallery
+              </Text>
+            </TouchableOpacity>
+
+            {/* Or Divider */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: '#e5e7eb' }} />
+              <Text style={{ marginHorizontal: 12, color: '#9ca3af', fontSize: 12, fontWeight: '600' }}>
+                OR choose an avatar
+              </Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: '#e5e7eb' }} />
+            </View>
 
             {/* Avatar Grid */}
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -995,12 +1243,14 @@ const CoachProfileScreen = ({ navigation }) => {
                     className="mb-4"
                     style={{ width: '23%' }}>
                     <View
-                      className="aspect-square rounded-2xl p-2 border-2"
+                      className="aspect-square rounded-2xl p-2"
                       style={{
+                        borderWidth: 2.5,
                         borderColor:
-                          selectedAvatar === avatar ? '#1e3a8a' : '#e5e7eb',
+                          selectedAvatar === avatar ? '#1e3a8a' : '#f3f4f6',
                         backgroundColor:
-                          selectedAvatar === avatar ? '#1e3a8a10' : '#f9fafb',
+                          selectedAvatar === avatar ? '#1e3a8a08' : '#f9fafb',
+                        borderRadius: 16,
                       }}>
                       <Image
                         source={{ uri: avatar }}
@@ -1009,8 +1259,29 @@ const CoachProfileScreen = ({ navigation }) => {
                       />
                     </View>
                     {selectedAvatar === avatar && (
-                      <View className="absolute -top-1 -right-1 w-6 h-6 bg-primary rounded-full justify-center items-center">
-                        <Icon name="check" size={14} color="#fff" />
+                      <View
+                        style={{
+                          position: 'absolute',
+                          top: -4,
+                          right: -4,
+                          width: 24,
+                          height: 24,
+                          borderRadius: 12,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          overflow: 'hidden',
+                        }}>
+                        <LinearGradient
+                          colors={['#1e3a8a', '#3b82f6']}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: 12,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }}>
+                          <Icon name="check" size={14} color="#fff" />
+                        </LinearGradient>
                       </View>
                     )}
                   </TouchableOpacity>
@@ -1019,42 +1290,64 @@ const CoachProfileScreen = ({ navigation }) => {
 
               {/* Current Selection Preview */}
               {selectedAvatar ? (
-                <View className="items-center mt-4 mb-4 p-4 bg-gray-50 rounded-2xl">
-                  <Text className="text-gray-500 text-xs mb-2 font-semibold">
+                <View className="items-center mt-4 mb-4 p-5 bg-gray-50 rounded-2xl">
+                  <Text className="text-gray-400 text-[11px] mb-3 font-bold uppercase tracking-wider">
                     Selected Avatar
                   </Text>
-                  <Image
-                    source={{ uri: selectedAvatar }}
-                    className="w-20 h-20 rounded-full"
-                    resizeMode="contain"
-                    style={{ backgroundColor: '#e5e7eb' }}
-                  />
+                  <View
+                    style={{
+                      borderWidth: 3,
+                      borderColor: '#1e3a8a20',
+                      borderRadius: 44,
+                      padding: 3,
+                    }}>
+                    <Image
+                      source={{ uri: selectedAvatar }}
+                      className="w-20 h-20 rounded-full"
+                      resizeMode="contain"
+                      style={{ backgroundColor: '#e5e7eb' }}
+                    />
+                  </View>
                 </View>
               ) : null}
             </ScrollView>
 
             {/* Modal Actions */}
-            <View className="flex-row mt-4">
+            <View className="flex-row mt-4" style={{ gap: 10 }}>
               <TouchableOpacity
                 onPress={() => setShowAvatarModal(false)}
                 activeOpacity={0.7}
-                className="flex-1 mr-2 border border-gray-300 rounded-xl py-3.5 items-center">
+                className="flex-1"
+                style={{
+                  borderWidth: 1.5,
+                  borderColor: '#e5e7eb',
+                  borderRadius: 14,
+                  paddingVertical: 14,
+                  alignItems: 'center',
+                }}>
                 <Text className="text-gray-600 font-bold">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={confirmAvatarChange}
                 activeOpacity={0.7}
-                className="flex-1 ml-2 rounded-xl py-3.5 items-center overflow-hidden"
-                disabled={!selectedAvatar}>
+                className="flex-1 overflow-hidden"
+                disabled={!selectedAvatar}
+                style={{ borderRadius: 14 }}>
                 <LinearGradient
                   colors={
                     selectedAvatar
                       ? ['#1e3a8a', '#3b82f6']
-                      : ['#9ca3af', '#9ca3af']
+                      : ['#d1d5db', '#d1d5db']
                   }
-                  className="absolute inset-0"
-                />
-                <Text className="text-white font-bold">Save Avatar</Text>
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    borderRadius: 14,
+                  }}>
+                  <Text className="text-white font-bold">Save Avatar</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>

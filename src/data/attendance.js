@@ -37,7 +37,7 @@ export const attendanceRecords = [
   },
 ];
 
-// ─── Coach Attendance Tracking Records (for CoachAttendanceScreen) ───
+// ─── Coach Attendance Tracking Records (for CoachAttendanceScreen - Member Records tab) ───
 // These represent individual member visit records with punch in/out times
 export const coachAttendanceRecords = [
   {
@@ -390,6 +390,123 @@ export const coachAttendanceRecords = [
     clubName: 'Downtown Fitness Hub',
     sport: 'Yoga',
   },
+];
+
+// ─── Coach Self-Attendance Records (for Coach's own punch in/out) ───
+// These represent the coach's own attendance at the club
+export const coachSelfAttendanceRecords = [
+  {
+    _id: 'csa1',
+    date: '2026-03-13T06:00:00Z',
+    punchInTime: '2026-03-13T06:00:00Z',
+    punchOutTime: '2026-03-13T14:00:00Z',
+    facility: 'Main Dojo',
+    duration: 480,
+    status: 'completed',
+    clubName: 'Downtown Fitness Hub',
+    notes: 'Morning karate sessions + afternoon boxing',
+  },
+  {
+    _id: 'csa2',
+    date: '2026-03-12T06:00:00Z',
+    punchInTime: '2026-03-12T06:00:00Z',
+    punchOutTime: '2026-03-12T14:30:00Z',
+    facility: 'Main Dojo',
+    duration: 510,
+    status: 'completed',
+    clubName: 'Downtown Fitness Hub',
+    notes: 'Full day coaching sessions',
+  },
+  {
+    _id: 'csa3',
+    date: '2026-03-11T06:30:00Z',
+    punchInTime: '2026-03-11T06:30:00Z',
+    punchOutTime: '2026-03-11T13:00:00Z',
+    facility: 'Main Dojo',
+    duration: 390,
+    status: 'completed',
+    clubName: 'Downtown Fitness Hub',
+    notes: 'Karate and fitness classes',
+  },
+  {
+    _id: 'csa4',
+    date: '2026-03-10T06:00:00Z',
+    punchInTime: '2026-03-10T06:00:00Z',
+    punchOutTime: '2026-03-10T12:00:00Z',
+    facility: 'Gym Floor',
+    duration: 360,
+    status: 'completed',
+    clubName: 'Downtown Fitness Hub',
+    notes: 'Gym training day',
+  },
+  {
+    _id: 'csa5',
+    date: '2026-03-09T14:00:00Z',
+    punchInTime: '2026-03-09T14:00:00Z',
+    punchOutTime: '2026-03-09T20:00:00Z',
+    facility: 'Main Dojo',
+    duration: 360,
+    status: 'completed',
+    clubName: 'Downtown Fitness Hub',
+    notes: 'Afternoon & evening sessions',
+  },
+  {
+    _id: 'csa6',
+    date: '2026-03-08T08:00:00Z',
+    punchInTime: '2026-03-08T08:00:00Z',
+    punchOutTime: '2026-03-08T14:00:00Z',
+    facility: 'Main Dojo',
+    duration: 360,
+    status: 'completed',
+    clubName: 'Downtown Fitness Hub',
+    notes: 'Saturday half day',
+  },
+  {
+    _id: 'csa7',
+    date: '2026-03-07T06:00:00Z',
+    punchInTime: '2026-03-07T06:00:00Z',
+    punchOutTime: '2026-03-07T14:00:00Z',
+    facility: 'Main Dojo',
+    duration: 480,
+    status: 'completed',
+    clubName: 'Downtown Fitness Hub',
+    notes: 'Regular coaching day',
+  },
+  {
+    _id: 'csa8',
+    date: '2026-03-06T06:00:00Z',
+    punchInTime: '2026-03-06T06:00:00Z',
+    punchOutTime: '2026-03-06T12:00:00Z',
+    facility: 'Swimming Pool',
+    duration: 360,
+    status: 'completed',
+    clubName: 'Downtown Fitness Hub',
+    notes: 'Swimming coaching',
+  },
+];
+
+// ─── Coach Self-Attendance Stats ───
+export const coachSelfAttendanceStats = {
+  totalDays: 22,
+  completedDays: 20,
+  activeSessions: 0,
+  incompleteDays: 2,
+  attendanceRate: 91,
+  totalHours: 176,
+  avgHoursPerDay: 8,
+  currentStreak: 6,
+};
+
+// ─── Club Facilities (for coach punch-in facility selection) ───
+export const clubFacilities = [
+  { _id: 'cf1', name: 'Main Dojo', type: 'Training Hall' },
+  { _id: 'cf2', name: 'Boxing Ring', type: 'Ring' },
+  { _id: 'cf3', name: 'Gym Floor', type: 'Gym' },
+  { _id: 'cf4', name: 'Swimming Pool', type: 'Pool' },
+  { _id: 'cf5', name: 'Yoga Studio', type: 'Studio' },
+  { _id: 'cf6', name: 'Weight Room', type: 'Weights' },
+  { _id: 'cf7', name: 'Court 1', type: 'Court' },
+  { _id: 'cf8', name: 'Court 3', type: 'Court' },
 ];
 
 // ─── Member-specific attendance (for member detail view) ───

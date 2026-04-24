@@ -8,91 +8,150 @@ import {
     Alert,
     KeyboardAvoidingView,
     Platform,
+    Modal,
+    FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { members } from '../../data/members';
 import { SPORTS_LIST } from '../../data/sessions';
 import { DAYS_OF_WEEK, DIFFICULTY_LEVELS, PLAN_STATUSES } from '../../data/trainingPlans';
 
-// ─── Reusable Components ───
-const SectionTitle = ({ icon, title, actionLabel, onAction }) => (
-    <View className="flex-row items-center justify-between mb-3 mt-5">
-        <View className="flex-row items-center">
-            <Icon name={icon} size={18} color="#1e3a8a" />
-            <Text className="text-gray-900 font-bold text-base ml-2">{title}</Text>
+// ─── Sport Config ───
+const getSportConfig = sport => {
+    const configs = {
+        Karate: { color: '#ef4444', icon: 'karate', gradient: ['#ef4444', '#f97316'] },
+        Badminton: { color: '#22c55e', icon: 'badminton', gradient: ['#22c55e', '#10b981'] },
+        Swimming: { color: '#3b82f6', icon: 'swim', gradient: ['#3b82f6', '#06b6d4'] },
+        Boxing: { color: '#f59e0b', icon: 'boxing-glove', gradient: ['#f59e0b', '#ef4444'] },
+        Weightlifting: { color: '#8b5cf6', icon: 'weight-lifter', gradient: ['#8b5cf6', '#6366f1'] },
+        Yoga: { color: '#ec4899', icon: 'yoga', gradient: ['#ec4899', '#f472b6'] },
+        default: { color: '#6b7280', icon: 'dumbbell', gradient: ['#6b7280', '#9ca3af'] },
+    };
+    return configs[sport] || configs.default;
+};
+
+// ─── Reusable Section Card (matching MemberProfileScreen/CreateEditSessionScreen pattern) ───
+const SectionCard = ({ title, icon, iconColor = '#1e3a8a', children, rightAction }) => (
+    <View
+        className="bg-white rounded-2xl p-4 mb-4 shadow-sm"
+        style={{ elevation: 3 }}>
+        <View className="flex-row items-center justify-between mb-4">
+            <View className="flex-row items-center">
+                <View
+                    className="w-9 h-9 rounded-xl justify-center items-center mr-2.5"
+                    style={{ backgroundColor: `${iconColor}12` }}>
+                    <Icon name={icon} size={18} color={iconColor} />
+                </View>
+                <Text className="text-gray-900 font-bold text-lg">{title}</Text>
+            </View>
+            {rightAction}
         </View>
-        {actionLabel && (
-            <TouchableOpacity
-                onPress={onAction}
-                className="flex-row items-center bg-blue-50 px-3 py-1.5 rounded-full">
-                <Icon name="plus" size={14} color="#2563eb" />
-                <Text className="text-blue-600 text-xs font-semibold ml-1">{actionLabel}</Text>
-            </TouchableOpacity>
-        )}
+        {children}
     </View>
 );
 
-const FormLabel = ({ label, required }) => (
-    <Text className="text-gray-700 font-semibold text-sm mb-1.5">
-        {label}
-        {required && <Text className="text-red-500"> *</Text>}
+// ─── Form Field Label (matching CreateEditSessionScreen) ───
+const FieldLabel = ({ label, required }) => (
+    <Text className="text-gray-500 text-xs mb-2 font-semibold uppercase tracking-wider">
+        {label} {required && <Text className="text-red-500">*</Text>}
     </Text>
 );
 
-const FormInput = ({ placeholder, value, onChangeText, multiline, numberOfLines, keyboardType, ...props }) => (
-    <TextInput
-        className={`bg-white border border-gray-200 rounded-xl px-4 ${multiline ? 'py-3' : 'py-3'} text-gray-900 text-sm`}
-        placeholder={placeholder}
-        placeholderTextColor="#9ca3af"
-        value={value}
-        onChangeText={onChangeText}
-        multiline={multiline}
-        numberOfLines={numberOfLines}
-        keyboardType={keyboardType || 'default'}
-        textAlignVertical={multiline ? 'top' : 'center'}
-        style={multiline ? { minHeight: numberOfLines ? numberOfLines * 24 : 72 } : {}}
-        {...props}
-    />
-);
-
-const PickerButton = ({ label, value, options, onSelect }) => {
-    const [showOptions, setShowOptions] = useState(false);
-
+// ─── Picker Modal Component (matching CreateEditSessionScreen) ───
+const PickerModal = ({ visible, onClose, title, data, onSelect, selectedValue, renderLabel }) => {
     return (
-        <View>
-            <TouchableOpacity
-                onPress={() => setShowOptions(!showOptions)}
-                className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex-row items-center justify-between">
-                <Text className={value ? 'text-gray-900 text-sm' : 'text-gray-400 text-sm'}>
-                    {value || label}
-                </Text>
-                <Icon name={showOptions ? 'chevron-up' : 'chevron-down'} size={18} color="#6b7280" />
-            </TouchableOpacity>
-            {showOptions && (
-                <View className="bg-white border border-gray-200 rounded-xl mt-1 overflow-hidden" style={{ elevation: 4 }}>
-                    <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
-                        {options.map((option, idx) => (
-                            <TouchableOpacity
-                                key={idx}
-                                onPress={() => {
-                                    onSelect(typeof option === 'string' ? option : option.value);
-                                    setShowOptions(false);
-                                }}
-                                className={`px-4 py-3 border-b border-gray-50 ${(typeof option === 'string' ? option : option.value) === value ? 'bg-blue-50' : ''}`}>
-                                <Text className={`text-sm ${(typeof option === 'string' ? option : option.value) === value ? 'text-blue-700 font-semibold' : 'text-gray-700'}`}>
-                                    {typeof option === 'string' ? option : option.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
+        <Modal
+            visible={visible}
+            transparent
+            animationType="slide"
+            onRequestClose={onClose}>
+            <View className="flex-1 bg-black/50 justify-end">
+                <View className="bg-white rounded-t-3xl max-h-[70%]">
+                    {/* Header */}
+                    <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
+                        <View className="flex-row items-center">
+                            <View className="w-8 h-8 rounded-lg bg-blue-50 justify-center items-center mr-2.5">
+                                <Icon name="format-list-bulleted" size={16} color="#1e3a8a" />
+                            </View>
+                            <Text className="text-gray-900 font-bold text-lg">{title}</Text>
+                        </View>
+                        <TouchableOpacity
+                            onPress={onClose}
+                            className="w-8 h-8 bg-gray-100 rounded-full justify-center items-center">
+                            <Icon name="close" size={18} color="#6b7280" />
+                        </TouchableOpacity>
+                    </View>
+                    {/* Options */}
+                    <FlatList
+                        data={data}
+                        keyExtractor={(item, index) => item._id || item.id || item.value || String(index)}
+                        renderItem={({ item }) => {
+                            const itemValue = item._id || item.id || item.value || (typeof item === 'string' ? item : '');
+                            const isSelected = itemValue === selectedValue;
+                            return (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        onSelect(item);
+                                        onClose();
+                                    }}
+                                    activeOpacity={0.7}
+                                    className={`flex-row items-center px-6 py-4 border-b border-gray-50 ${isSelected ? 'bg-blue-50' : ''}`}>
+                                    <View className="flex-1">
+                                        <Text className={`text-sm ${isSelected ? 'text-blue-700 font-bold' : 'text-gray-800 font-medium'}`}>
+                                            {renderLabel ? renderLabel(item) : (item.name || item.label || item.title || item)}
+                                        </Text>
+                                    </View>
+                                    {isSelected && (
+                                        <View className="w-7 h-7 rounded-full bg-blue-100 justify-center items-center">
+                                            <Icon name="check" size={16} color="#2563eb" />
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+                            );
+                        }}
+                        ListEmptyComponent={
+                            <View className="py-8 items-center">
+                                <View className="w-16 h-16 rounded-full bg-gray-50 justify-center items-center mb-3">
+                                    <Icon name="alert-circle-outline" size={32} color="#d1d5db" />
+                                </View>
+                                <Text className="text-gray-400 text-sm">No options available</Text>
+                            </View>
+                        }
+                        contentContainerStyle={{ paddingBottom: 40 }}
+                    />
                 </View>
-            )}
-        </View>
+            </View>
+        </Modal>
     );
 };
 
-const TagInput = ({ tags, onAdd, onRemove, placeholder, color = 'purple' }) => {
+// ─── Dropdown Button Component (matching CreateEditSessionScreen) ───
+const DropdownButton = ({ label, value, placeholder, onPress, icon }) => (
+    <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.7}
+        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 flex-row items-center justify-between"
+        style={{ elevation: 1 }}>
+        <View className="flex-row items-center flex-1">
+            {icon && (
+                <View className="w-8 h-8 rounded-lg bg-white justify-center items-center mr-2.5" style={{ borderWidth: 1, borderColor: '#f3f4f6' }}>
+                    <Icon name={icon} size={16} color="#6b7280" />
+                </View>
+            )}
+            <Text
+                className={`text-sm flex-1 ${value ? 'text-gray-900 font-medium' : 'text-gray-400'}`}
+                numberOfLines={1}>
+                {value || placeholder}
+            </Text>
+        </View>
+        <Icon name="chevron-down" size={18} color="#9ca3af" />
+    </TouchableOpacity>
+);
+
+// ─── Tag Input Component (enhanced) ───
+const TagInput = ({ tags, onAdd, onRemove, placeholder, color = 'purple', icon = 'tag' }) => {
     const [input, setInput] = useState('');
 
     const handleAdd = () => {
@@ -103,38 +162,181 @@ const TagInput = ({ tags, onAdd, onRemove, placeholder, color = 'purple' }) => {
         }
     };
 
-    const bgColor = color === 'purple' ? 'bg-purple-50' : 'bg-amber-50';
-    const textColor = color === 'purple' ? 'text-purple-700' : 'text-amber-700';
+    const bgColor = color === 'purple' ? '#f3e8ff' : '#fffbeb';
+    const textColor = color === 'purple' ? '#7c3aed' : '#d97706';
+    const closeBg = color === 'purple' ? '#ede9fe' : '#fef3c7';
 
     return (
         <View>
-            <View className="flex-row items-center gap-2">
+            <View className="flex-row items-center" style={{ gap: 8 }}>
                 <View className="flex-1">
-                    <FormInput
+                    <TextInput
+                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 text-sm font-medium"
                         placeholder={placeholder}
+                        placeholderTextColor="#9ca3af"
                         value={input}
                         onChangeText={setInput}
                         onSubmitEditing={handleAdd}
                         returnKeyType="done"
+                        style={{ elevation: 1 }}
                     />
                 </View>
                 <TouchableOpacity
                     onPress={handleAdd}
-                    className="w-11 h-11 bg-blue-50 rounded-xl justify-center items-center">
-                    <Icon name="plus" size={20} color="#2563eb" />
+                    activeOpacity={0.8}>
+                    <LinearGradient
+                        colors={['#1e3a8a', '#3b82f6']}
+                        style={{ width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' }}>
+                        <Icon name="plus" size={20} color="#fff" />
+                    </LinearGradient>
                 </TouchableOpacity>
             </View>
             {tags.length > 0 && (
-                <View className="flex-row flex-wrap gap-2 mt-2">
+                <View className="flex-row flex-wrap mt-2.5" style={{ gap: 6 }}>
                     {tags.map((tag, idx) => (
-                        <View key={idx} className={`${bgColor} flex-row items-center px-3 py-1.5 rounded-full`}>
-                            <Text className={`${textColor} text-xs font-medium`}>{tag}</Text>
-                            <TouchableOpacity onPress={() => onRemove(idx)} className="ml-1.5">
-                                <Icon name="close-circle" size={14} color={color === 'purple' ? '#7c3aed' : '#d97706'} />
+                        <View
+                            key={idx}
+                            className="flex-row items-center px-3 py-1.5 rounded-full"
+                            style={{ backgroundColor: bgColor }}>
+                            <Icon name={icon} size={10} color={textColor} />
+                            <Text className="text-xs font-bold ml-1.5" style={{ color: textColor }}>{tag}</Text>
+                            <TouchableOpacity onPress={() => onRemove(idx)} className="ml-2">
+                                <View
+                                    className="w-5 h-5 rounded-full justify-center items-center"
+                                    style={{ backgroundColor: closeBg }}>
+                                    <Icon name="close" size={10} color={textColor} />
+                                </View>
                             </TouchableOpacity>
                         </View>
                     ))}
                 </View>
+            )}
+        </View>
+    );
+};
+
+// ─── Date Picker Field (enhanced) ───
+const DatePickerField = ({ value, onChange, placeholder }) => {
+    const [showPicker, setShowPicker] = useState(false);
+
+    const parseDate = (dateStr) => {
+        if (!dateStr) return new Date();
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+        return new Date();
+    };
+
+    const formatDateStr = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const formatDisplayDate = (dateStr) => {
+        if (!dateStr) return '';
+        const date = parseDate(dateStr);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    };
+
+    const handleDateChange = (event, selectedDate) => {
+        if (Platform.OS === 'android') {
+            setShowPicker(false);
+        }
+        if (event.type === 'dismissed') {
+            setShowPicker(false);
+            return;
+        }
+        if (selectedDate) {
+            onChange(formatDateStr(selectedDate));
+        }
+    };
+
+    // ─── iOS Picker Modal ───
+    const IOSPickerModal = ({ visible, onClose, title, children }) => (
+        <Modal
+            visible={visible}
+            transparent
+            animationType="slide"
+            onRequestClose={onClose}>
+            <View className="flex-1 bg-black/50 justify-end">
+                <View className="bg-white rounded-t-3xl">
+                    <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
+                        <View className="flex-row items-center">
+                            <View className="w-8 h-8 rounded-lg bg-blue-50 justify-center items-center mr-2.5">
+                                <Icon name="calendar-clock" size={16} color="#1e3a8a" />
+                            </View>
+                            <Text className="text-gray-900 font-bold text-lg">{title}</Text>
+                        </View>
+                        <TouchableOpacity
+                            onPress={onClose}
+                            activeOpacity={0.8}>
+                            <LinearGradient
+                                colors={['#1e3a8a', '#3b82f6']}
+                                style={{ borderRadius: 10, paddingHorizontal: 16, paddingVertical: 8 }}>
+                                <Text className="text-white font-bold text-sm">Done</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </View>
+                    <View className="px-4 py-2 pb-8">
+                        {children}
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    );
+
+    return (
+        <View>
+            <View className="flex-row items-center">
+                <View className="flex-1 mr-2">
+                    <TextInput
+                        value={value ? formatDisplayDate(value) : ''}
+                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 text-sm font-medium"
+                        placeholder={placeholder || 'Select date'}
+                        placeholderTextColor="#9ca3af"
+                        editable={false}
+                        style={{ elevation: 1 }}
+                    />
+                </View>
+                <TouchableOpacity
+                    onPress={() => setShowPicker(true)}
+                    activeOpacity={0.7}>
+                    <LinearGradient
+                        colors={['#3b82f6', '#60a5fa']}
+                        style={{ width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' }}>
+                        <Icon name="calendar" size={22} color="#fff" />
+                    </LinearGradient>
+                </TouchableOpacity>
+            </View>
+
+            {/* Android Date Picker */}
+            {Platform.OS === 'android' && showPicker && (
+                <DateTimePicker
+                    value={parseDate(value)}
+                    mode="date"
+                    display="default"
+                    onChange={handleDateChange}
+                />
+            )}
+
+            {/* iOS Date Picker */}
+            {Platform.OS === 'ios' && (
+                <IOSPickerModal
+                    visible={showPicker}
+                    onClose={() => setShowPicker(false)}
+                    title="Select Date">
+                    <DateTimePicker
+                        value={parseDate(value)}
+                        mode="date"
+                        display="spinner"
+                        onChange={handleDateChange}
+                        style={{ height: 200 }}
+                    />
+                </IOSPickerModal>
             )}
         </View>
     );
@@ -151,8 +353,11 @@ const CreateEditTrainingPlanScreen = ({ navigation, route }) => {
     const { mode, plan, onSave } = route.params || {};
     const isEdit = mode === 'edit';
 
-    const memberOptions = members.map(m => ({ label: `${m.name} (${m.sport})`, value: m.id }));
-    const sportOptions = SPORTS_LIST.map(s => ({ label: `${s.name} (${s.category})`, value: s.name }));
+    const memberOptions = members.map(m => ({ label: `${m.name} (${m.sport})`, value: m.id, id: m.id }));
+    const sportOptions = SPORTS_LIST.map(s => ({ label: `${s.name} (${s.category})`, value: s.name, id: s.name }));
+    const difficultyOptions = DIFFICULTY_LEVELS.map(d => (typeof d === 'string' ? { label: d, value: d, id: d } : { label: d.label || d, value: d.value || d, id: d.value || d }));
+    const statusOptions = PLAN_STATUSES.map(s => (typeof s === 'string' ? { label: s, value: s, id: s } : { label: s.label || s, value: s.value || s, id: s.value || s }));
+    const dayOptions = DAYS_OF_WEEK.map(d => (typeof d === 'string' ? { label: d, value: d, id: d } : { label: d.label || d, value: d.value || d, id: d.value || d }));
 
     const [formData, setFormData] = useState({
         title: '',
@@ -172,6 +377,13 @@ const CreateEditTrainingPlanScreen = ({ navigation, route }) => {
         dietRecommendation: { calories: '', protein: '', carbs: '', fat: '', notes: '' },
         specialConsiderations: [],
     });
+
+    // Modal visibility states
+    const [showMemberPicker, setShowMemberPicker] = useState(false);
+    const [showSportPicker, setShowSportPicker] = useState(false);
+    const [showDifficultyPicker, setShowDifficultyPicker] = useState(false);
+    const [showStatusPicker, setShowStatusPicker] = useState(false);
+    const [showDayPicker, setShowDayPicker] = useState({ visible: false, dayIndex: -1 });
 
     useEffect(() => {
         if (isEdit && plan) {
@@ -214,11 +426,11 @@ const CreateEditTrainingPlanScreen = ({ navigation, route }) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleMemberSelect = memberId => {
-        const member = members.find(m => m.id === memberId);
+    const handleMemberSelect = (item) => {
+        const member = members.find(m => m.id === item.value);
         setFormData(prev => ({
             ...prev,
-            memberId,
+            memberId: item.value,
             memberName: member?.name || '',
         }));
     };
@@ -240,10 +452,19 @@ const CreateEditTrainingPlanScreen = ({ navigation, route }) => {
     };
 
     const removeExercise = index => {
-        setFormData(prev => ({
-            ...prev,
-            exercises: prev.exercises.filter((_, i) => i !== index),
-        }));
+        Alert.alert('Remove Exercise', 'Are you sure?', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'Remove',
+                style: 'destructive',
+                onPress: () => {
+                    setFormData(prev => ({
+                        ...prev,
+                        exercises: prev.exercises.filter((_, i) => i !== index),
+                    }));
+                },
+            },
+        ]);
     };
 
     // ─── Schedule Handlers ───
@@ -293,10 +514,19 @@ const CreateEditTrainingPlanScreen = ({ navigation, route }) => {
     };
 
     const removeScheduleDay = index => {
-        setFormData(prev => ({
-            ...prev,
-            schedule: prev.schedule.filter((_, i) => i !== index),
-        }));
+        Alert.alert('Remove Day', 'Are you sure?', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'Remove',
+                style: 'destructive',
+                onPress: () => {
+                    setFormData(prev => ({
+                        ...prev,
+                        schedule: prev.schedule.filter((_, i) => i !== index),
+                    }));
+                },
+            },
+        ]);
     };
 
     // ─── Save Handler ───
@@ -318,7 +548,7 @@ const CreateEditTrainingPlanScreen = ({ navigation, route }) => {
             return;
         }
         if (!formData.startDate || !formData.endDate) {
-            Alert.alert('Validation', 'Please enter start and end dates.');
+            Alert.alert('Validation', 'Please select start and end dates.');
             return;
         }
 
@@ -353,447 +583,699 @@ const CreateEditTrainingPlanScreen = ({ navigation, route }) => {
         if (onSave) {
             onSave(payload);
         }
-        navigation.goBack();
+
+        Alert.alert(
+            'Success',
+            isEdit
+                ? 'Training plan updated successfully!'
+                : 'Training plan created successfully!',
+            [{ text: 'OK', onPress: () => navigation.goBack() }],
+        );
     };
 
+    const sportConfig = getSportConfig(formData.sport);
+
     return (
-        <KeyboardAvoidingView
-            className="flex-1 bg-gray-50"
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            {/* Header */}
+        <View className="flex-1 bg-gray-50">
+            {/* ═══════════════════════════════════════════════ */}
+            {/* ─── HEADER (matching Dashboard pattern) ─── */}
+            {/* ═══════════════════════════════════════════════ */}
             <LinearGradient
-                colors={['#1e3a8a', '#3b82f6']}
-                className="px-6 pt-12 pb-6">
-                <View className="flex-row items-center">
+                colors={['#0f172a', '#1e3a8a', '#3b82f6']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ paddingTop: 48, paddingBottom: 28, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}>
+                {/* Top Bar */}
+                <View className="flex-row justify-between items-center px-5 mb-3">
                     <TouchableOpacity
                         onPress={() => navigation.goBack()}
-                        className="w-10 h-10 bg-white/20 rounded-full justify-center items-center mr-3">
+                        activeOpacity={0.7}
+                        className="w-10 h-10 bg-white/15 rounded-full justify-center items-center">
                         <Icon name="arrow-left" size={22} color="#fff" />
                     </TouchableOpacity>
-                    <View className="flex-1">
-                        <Text className="text-white font-bold text-xl">
-                            {isEdit ? 'Edit Training Plan' : 'Create Training Plan'}
-                        </Text>
-                        <Text className="text-white/70 text-sm">
-                            {isEdit ? 'Update plan details' : 'Set up a new training plan'}
-                        </Text>
-                    </View>
-                    <TouchableOpacity
-                        onPress={handleSave}
-                        className="bg-white/20 px-4 py-2 rounded-full">
-                        <Text className="text-white font-semibold text-sm">
-                            {isEdit ? 'Save' : 'Create'}
-                        </Text>
-                    </TouchableOpacity>
+                    <Text className="text-white font-bold text-lg">
+                        {isEdit ? 'Edit Training Plan' : 'Create Training Plan'}
+                    </Text>
+                    <View className="w-10 h-10" />
+                </View>
+
+                <View className="px-5">
+                    <Text className="text-white/60 text-sm">
+                        {isEdit ? 'Update plan details' : 'Set up a new training plan'}
+                    </Text>
                 </View>
             </LinearGradient>
 
             <ScrollView
-                className="flex-1 px-4"
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 100 }}>
+                className="flex-1 px-4 pt-4"
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}>
 
-                {/* ─── Basic Info ─── */}
-                <SectionTitle icon="information-outline" title="Basic Information" />
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── BASIC INFO SECTION ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <SectionCard title="Basic Info" icon="information-outline" iconColor="#1e3a8a">
+                    {/* Member */}
+                    <View className="mb-4">
+                        <FieldLabel label="Member" required />
+                        <DropdownButton
+                            value={formData.memberName ? `${formData.memberName}` : ''}
+                            placeholder="Select member"
+                            onPress={() => setShowMemberPicker(true)}
+                            icon="account-outline"
+                        />
+                    </View>
 
-                <View className="mb-3">
-                    <FormLabel label="Member" required />
-                    <PickerButton
-                        label="Select member"
-                        value={formData.memberId ? memberOptions.find(m => m.value === formData.memberId)?.label : ''}
-                        options={memberOptions}
-                        onSelect={handleMemberSelect}
-                    />
-                </View>
+                    {/* Title */}
+                    <View className="mb-4">
+                        <FieldLabel label="Plan Title" required />
+                        <TextInput
+                            value={formData.title}
+                            onChangeText={v => updateField('title', v)}
+                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 text-sm font-medium"
+                            placeholder="e.g., Beginner Strength Training"
+                            placeholderTextColor="#9ca3af"
+                            style={{ elevation: 1 }}
+                        />
+                    </View>
 
-                <View className="mb-3">
-                    <FormLabel label="Plan Title" required />
-                    <FormInput
-                        placeholder="e.g., Beginner Strength Training"
-                        value={formData.title}
-                        onChangeText={v => updateField('title', v)}
-                    />
-                </View>
+                    {/* Description */}
+                    <View>
+                        <FieldLabel label="Description" />
+                        <TextInput
+                            value={formData.description}
+                            onChangeText={v => updateField('description', v)}
+                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 text-sm"
+                            placeholder="Describe the training plan..."
+                            placeholderTextColor="#9ca3af"
+                            multiline
+                            numberOfLines={3}
+                            textAlignVertical="top"
+                            style={{ minHeight: 80, elevation: 1 }}
+                        />
+                    </View>
+                </SectionCard>
 
-                <View className="mb-3">
-                    <FormLabel label="Description" />
-                    <FormInput
-                        placeholder="Describe the training plan..."
-                        value={formData.description}
-                        onChangeText={v => updateField('description', v)}
-                        multiline
-                        numberOfLines={3}
-                    />
-                </View>
-
-                {/* Sport & Difficulty */}
-                <View className="flex-row gap-3 mb-3">
-                    <View className="flex-1">
-                        <FormLabel label="Sport" required />
-                        <PickerButton
-                            label="Select sport"
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── SPORT & DIFFICULTY SECTION ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <SectionCard title="Sport & Level" icon="run-fast" iconColor="#22c55e">
+                    {/* Sport Picker */}
+                    <View className="mb-4">
+                        <FieldLabel label="Sport / Activity" required />
+                        <DropdownButton
                             value={formData.sport}
-                            options={sportOptions}
-                            onSelect={v => updateField('sport', v)}
+                            placeholder="Select sport"
+                            onPress={() => setShowSportPicker(true)}
+                            icon="basketball"
                         />
                     </View>
-                    <View className="flex-1">
-                        <FormLabel label="Difficulty" />
-                        <PickerButton
-                            label="Select"
+
+                    {/* Difficulty */}
+                    <View className="mb-4">
+                        <FieldLabel label="Difficulty Level" />
+                        <DropdownButton
                             value={formData.difficulty}
-                            options={DIFFICULTY_LEVELS}
-                            onSelect={v => updateField('difficulty', v)}
+                            placeholder="Select difficulty"
+                            onPress={() => setShowDifficultyPicker(true)}
+                            icon="speedometer"
                         />
                     </View>
-                </View>
 
-                {/* Duration & Dates */}
-                <View className="mb-3">
-                    <FormLabel label="Duration (weeks)" required />
-                    <FormInput
-                        placeholder="e.g., 8"
-                        value={formData.duration}
-                        onChangeText={v => updateField('duration', v)}
-                        keyboardType="numeric"
-                    />
-                </View>
-
-                <View className="flex-row gap-3 mb-3">
-                    <View className="flex-1">
-                        <FormLabel label="Start Date" required />
-                        <FormInput
-                            placeholder="YYYY-MM-DD"
-                            value={formData.startDate}
-                            onChangeText={v => updateField('startDate', v)}
+                    {/* Status */}
+                    <View>
+                        <FieldLabel label="Status" />
+                        <DropdownButton
+                            value={formData.status}
+                            placeholder="Select status"
+                            onPress={() => setShowStatusPicker(true)}
+                            icon="flag-outline"
                         />
                     </View>
-                    <View className="flex-1">
-                        <FormLabel label="End Date" required />
-                        <FormInput
-                            placeholder="YYYY-MM-DD"
-                            value={formData.endDate}
-                            onChangeText={v => updateField('endDate', v)}
+                </SectionCard>
+
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── DURATION & DATES SECTION ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <SectionCard title="Duration & Dates" icon="calendar-clock" iconColor="#3b82f6">
+                    {/* Duration */}
+                    <View className="mb-4">
+                        <FieldLabel label="Duration (weeks)" required />
+                        <TextInput
+                            value={formData.duration}
+                            onChangeText={v => updateField('duration', v)}
+                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 text-sm font-medium"
+                            placeholder="e.g., 8"
+                            placeholderTextColor="#9ca3af"
+                            keyboardType="numeric"
+                            style={{ elevation: 1 }}
                         />
                     </View>
-                </View>
 
-                {/* Status */}
-                <View className="mb-3">
-                    <FormLabel label="Status" />
-                    <PickerButton
-                        label="Select status"
-                        value={formData.status}
-                        options={PLAN_STATUSES}
-                        onSelect={v => updateField('status', v)}
+                    {/* Start & End Date Row */}
+                    <View className="flex-row mb-4">
+                        <View className="flex-1 mr-2">
+                            <FieldLabel label="Start Date" required />
+                            <DatePickerField
+                                value={formData.startDate}
+                                onChange={v => updateField('startDate', v)}
+                                placeholder="Select start date"
+                            />
+                        </View>
+                        <View className="flex-1 ml-2">
+                            <FieldLabel label="End Date" required />
+                            <DatePickerField
+                                value={formData.endDate}
+                                onChange={v => updateField('endDate', v)}
+                                placeholder="Select end date"
+                            />
+                        </View>
+                    </View>
+
+                    {/* Frequency */}
+                    <View>
+                        <FieldLabel label="Frequency" />
+                        <TextInput
+                            value={formData.frequency}
+                            onChangeText={v => updateField('frequency', v)}
+                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 text-sm font-medium"
+                            placeholder="e.g., 3 times per week, Daily"
+                            placeholderTextColor="#9ca3af"
+                            style={{ elevation: 1 }}
+                        />
+                    </View>
+                </SectionCard>
+
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── GOALS SECTION ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <SectionCard title="Goals" icon="target" iconColor="#8b5cf6">
+                    <TagInput
+                        tags={formData.goals}
+                        onAdd={tag => updateField('goals', [...formData.goals, tag])}
+                        onRemove={idx => updateField('goals', formData.goals.filter((_, i) => i !== idx))}
+                        placeholder="Add a goal..."
+                        color="purple"
+                        icon="target"
                     />
-                </View>
+                </SectionCard>
 
-                {/* Frequency */}
-                <View className="mb-3">
-                    <FormLabel label="Frequency" />
-                    <FormInput
-                        placeholder="e.g., 3 times per week, Daily"
-                        value={formData.frequency}
-                        onChangeText={v => updateField('frequency', v)}
-                    />
-                </View>
-
-                {/* ─── Goals ─── */}
-                <SectionTitle icon="target" title="Goals" />
-                <TagInput
-                    tags={formData.goals}
-                    onAdd={tag => updateField('goals', [...formData.goals, tag])}
-                    onRemove={idx => updateField('goals', formData.goals.filter((_, i) => i !== idx))}
-                    placeholder="Add a goal..."
-                    color="purple"
-                />
-
-                {/* ─── Exercises ─── */}
-                <SectionTitle
-                    icon="dumbbell"
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── EXERCISES SECTION ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <SectionCard
                     title="Exercises"
-                    actionLabel="Add Exercise"
-                    onAction={addExercise}
-                />
-                {formData.exercises.map((ex, index) => (
-                    <View key={index} className="bg-white rounded-xl p-4 mb-3 border border-gray-100" style={{ elevation: 1 }}>
-                        <View className="flex-row items-center justify-between mb-3">
-                            <Text className="text-gray-700 font-semibold text-sm">
-                                Exercise {index + 1}
+                    icon="dumbbell"
+                    iconColor="#4f46e5"
+                    rightAction={
+                        <TouchableOpacity
+                            onPress={addExercise}
+                            activeOpacity={0.8}>
+                            <LinearGradient
+                                colors={['#1e3a8a', '#3b82f6']}
+                                style={{ borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8, flexDirection: 'row', alignItems: 'center' }}>
+                                <Icon name="plus" size={14} color="#fff" />
+                                <Text className="text-white font-bold text-xs ml-1">Add</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    }>
+                    {formData.exercises.length > 0 ? (
+                        formData.exercises.map((ex, index) => (
+                            <View
+                                key={index}
+                                className="bg-gray-50 rounded-xl p-3.5 mb-3 overflow-hidden"
+                                style={{ borderLeftWidth: 3, borderLeftColor: sportConfig.color, elevation: 1 }}>
+                                {/* Exercise Header */}
+                                <View className="flex-row items-center justify-between mb-2.5">
+                                    <View className="flex-row items-center">
+                                        <LinearGradient
+                                            colors={sportConfig.gradient}
+                                            style={{ width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' }}>
+                                            <Text className="text-white text-[10px] font-bold">
+                                                {index + 1}
+                                            </Text>
+                                        </LinearGradient>
+                                        <Text className="text-gray-900 font-bold text-xs ml-2">
+                                            Exercise {index + 1}
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => removeExercise(index)}
+                                        className="w-8 h-8 bg-red-50 rounded-lg justify-center items-center"
+                                        style={{ borderWidth: 1, borderColor: '#fecaca' }}>
+                                        <Icon name="trash-can-outline" size={14} color="#dc2626" />
+                                    </TouchableOpacity>
+                                </View>
+
+                                {/* Exercise Name */}
+                                <TextInput
+                                    value={ex.name}
+                                    onChangeText={v => updateExercise(index, 'name', v)}
+                                    className="bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-900 text-sm mb-2.5 font-medium"
+                                    placeholder="Exercise name (e.g., Squats)"
+                                    placeholderTextColor="#9ca3af"
+                                />
+
+                                {/* Sets, Reps, Duration Row */}
+                                <View className="flex-row mb-2.5" style={{ gap: 6 }}>
+                                    <View className="flex-1">
+                                        <Text className="text-gray-400 text-[10px] mb-1 font-medium uppercase tracking-wider">Sets</Text>
+                                        <TextInput
+                                            value={ex.sets}
+                                            onChangeText={v => updateExercise(index, 'sets', v)}
+                                            className="bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 text-xs text-center font-medium"
+                                            placeholder="3"
+                                            placeholderTextColor="#9ca3af"
+                                            keyboardType="numeric"
+                                        />
+                                    </View>
+                                    <View className="flex-1">
+                                        <Text className="text-gray-400 text-[10px] mb-1 font-medium uppercase tracking-wider">Reps</Text>
+                                        <TextInput
+                                            value={ex.reps}
+                                            onChangeText={v => updateExercise(index, 'reps', v)}
+                                            className="bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 text-xs text-center font-medium"
+                                            placeholder="12"
+                                            placeholderTextColor="#9ca3af"
+                                            keyboardType="numeric"
+                                        />
+                                    </View>
+                                    <View className="flex-1">
+                                        <Text className="text-gray-400 text-[10px] mb-1 font-medium uppercase tracking-wider">Duration</Text>
+                                        <TextInput
+                                            value={ex.duration}
+                                            onChangeText={v => updateExercise(index, 'duration', v)}
+                                            className="bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 text-xs text-center font-medium"
+                                            placeholder="10m"
+                                            placeholderTextColor="#9ca3af"
+                                            keyboardType="numeric"
+                                        />
+                                    </View>
+                                </View>
+
+                                {/* Rest & Notes Row */}
+                                <View className="flex-row mb-2.5" style={{ gap: 6 }}>
+                                    <View className="flex-1">
+                                        <Text className="text-gray-400 text-[10px] mb-1 font-medium uppercase tracking-wider">Rest (sec)</Text>
+                                        <TextInput
+                                            value={ex.restTime}
+                                            onChangeText={v => updateExercise(index, 'restTime', v)}
+                                            className="bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 text-xs text-center font-medium"
+                                            placeholder="60"
+                                            placeholderTextColor="#9ca3af"
+                                            keyboardType="numeric"
+                                        />
+                                    </View>
+                                    <View className="flex-1">
+                                        <Text className="text-gray-400 text-[10px] mb-1 font-medium uppercase tracking-wider">Notes</Text>
+                                        <TextInput
+                                            value={ex.notes || ''}
+                                            onChangeText={v => updateExercise(index, 'notes', v)}
+                                            className="bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-gray-800 text-xs"
+                                            placeholder="Notes..."
+                                            placeholderTextColor="#9ca3af"
+                                        />
+                                    </View>
+                                </View>
+
+                                {/* Description */}
+                                <TextInput
+                                    value={ex.description || ''}
+                                    onChangeText={v => updateExercise(index, 'description', v)}
+                                    className="bg-white border border-gray-200 rounded-lg px-3.5 py-2.5 text-gray-800 text-xs"
+                                    placeholder="Exercise description (optional)"
+                                    placeholderTextColor="#9ca3af"
+                                    multiline
+                                    numberOfLines={2}
+                                    textAlignVertical="top"
+                                    style={{ minHeight: 48 }}
+                                />
+                            </View>
+                        ))
+                    ) : (
+                        <View className="items-center py-8 bg-gray-50 rounded-xl" style={{ borderWidth: 1, borderColor: '#f3f4f6', borderStyle: 'dashed' }}>
+                            <View className="w-16 h-16 rounded-full bg-white justify-center items-center mb-3" style={{ elevation: 2 }}>
+                                <Icon name="dumbbell" size={28} color="#d1d5db" />
+                            </View>
+                            <Text className="text-gray-900 font-bold text-sm">No exercises added</Text>
+                            <Text className="text-gray-400 text-xs mt-1 text-center px-4">
+                                Tap "Add" to start building the exercise plan
                             </Text>
-                            <TouchableOpacity onPress={() => removeExercise(index)}>
-                                <Icon name="trash-can-outline" size={18} color="#dc2626" />
-                            </TouchableOpacity>
                         </View>
+                    )}
+                </SectionCard>
 
-                        <View className="mb-2">
-                            <FormInput
-                                placeholder="Exercise name (e.g., Squats)"
-                                value={ex.name}
-                                onChangeText={v => updateExercise(index, 'name', v)}
-                            />
-                        </View>
-
-                        <View className="flex-row gap-2 mb-2">
-                            <View className="flex-1">
-                                <Text className="text-gray-500 text-xs mb-1">Sets</Text>
-                                <FormInput
-                                    placeholder="3"
-                                    value={ex.sets}
-                                    onChangeText={v => updateExercise(index, 'sets', v)}
-                                    keyboardType="numeric"
-                                />
-                            </View>
-                            <View className="flex-1">
-                                <Text className="text-gray-500 text-xs mb-1">Reps</Text>
-                                <FormInput
-                                    placeholder="12"
-                                    value={ex.reps}
-                                    onChangeText={v => updateExercise(index, 'reps', v)}
-                                    keyboardType="numeric"
-                                />
-                            </View>
-                            <View className="flex-1">
-                                <Text className="text-gray-500 text-xs mb-1">Duration (min)</Text>
-                                <FormInput
-                                    placeholder="10"
-                                    value={ex.duration}
-                                    onChangeText={v => updateExercise(index, 'duration', v)}
-                                    keyboardType="numeric"
-                                />
-                            </View>
-                        </View>
-
-                        <View className="flex-row gap-2 mb-2">
-                            <View className="flex-1">
-                                <Text className="text-gray-500 text-xs mb-1">Rest (sec)</Text>
-                                <FormInput
-                                    placeholder="60"
-                                    value={ex.restTime}
-                                    onChangeText={v => updateExercise(index, 'restTime', v)}
-                                    keyboardType="numeric"
-                                />
-                            </View>
-                            <View className="flex-1">
-                                <Text className="text-gray-500 text-xs mb-1">Notes</Text>
-                                <FormInput
-                                    placeholder="Any notes..."
-                                    value={ex.notes}
-                                    onChangeText={v => updateExercise(index, 'notes', v)}
-                                />
-                            </View>
-                        </View>
-
-                        <View>
-                            <Text className="text-gray-500 text-xs mb-1">Description</Text>
-                            <FormInput
-                                placeholder="Exercise description..."
-                                value={ex.description}
-                                onChangeText={v => updateExercise(index, 'description', v)}
-                                multiline
-                                numberOfLines={2}
-                            />
-                        </View>
-                    </View>
-                ))}
-                {formData.exercises.length === 0 && (
-                    <View className="bg-white rounded-xl p-6 items-center border border-gray-100">
-                        <Icon name="dumbbell" size={32} color="#d1d5db" />
-                        <Text className="text-gray-400 text-sm mt-2">
-                            No exercises added yet
-                        </Text>
-                    </View>
-                )}
-
-                {/* ─── Schedule ─── */}
-                <SectionTitle
-                    icon="calendar-week"
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── WEEKLY SCHEDULE SECTION ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <SectionCard
                     title="Weekly Schedule"
-                    actionLabel="Add Day"
-                    onAction={addScheduleDay}
-                />
-                {formData.schedule.map((scheduleDay, dayIndex) => (
-                    <View key={dayIndex} className="bg-white rounded-xl p-4 mb-3 border border-gray-100" style={{ elevation: 1 }}>
-                        <View className="flex-row items-center justify-between mb-3">
-                            <Text className="text-gray-700 font-semibold text-sm">
-                                Day {dayIndex + 1}
-                            </Text>
-                            <TouchableOpacity onPress={() => removeScheduleDay(dayIndex)}>
-                                <Icon name="trash-can-outline" size={18} color="#dc2626" />
-                            </TouchableOpacity>
-                        </View>
+                    icon="calendar-week"
+                    iconColor="#f59e0b"
+                    rightAction={
+                        <TouchableOpacity
+                            onPress={addScheduleDay}
+                            activeOpacity={0.8}>
+                            <LinearGradient
+                                colors={['#1e3a8a', '#3b82f6']}
+                                style={{ borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8, flexDirection: 'row', alignItems: 'center' }}>
+                                <Icon name="plus" size={14} color="#fff" />
+                                <Text className="text-white font-bold text-xs ml-1">Add Day</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    }>
+                    {formData.schedule.length > 0 ? (
+                        formData.schedule.map((scheduleDay, dayIndex) => (
+                            <View
+                                key={dayIndex}
+                                className="bg-gray-50 rounded-xl p-3.5 mb-3 overflow-hidden"
+                                style={{ borderLeftWidth: 3, borderLeftColor: '#f59e0b', elevation: 1 }}>
+                                {/* Day Header */}
+                                <View className="flex-row items-center justify-between mb-2.5">
+                                    <View className="flex-row items-center">
+                                        <LinearGradient
+                                            colors={['#f59e0b', '#d97706']}
+                                            style={{ width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' }}>
+                                            <Text className="text-white text-[10px] font-bold">
+                                                {dayIndex + 1}
+                                            </Text>
+                                        </LinearGradient>
+                                        <Text className="text-gray-900 font-bold text-xs ml-2">
+                                            Day {dayIndex + 1}
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => removeScheduleDay(dayIndex)}
+                                        className="w-8 h-8 bg-red-50 rounded-lg justify-center items-center"
+                                        style={{ borderWidth: 1, borderColor: '#fecaca' }}>
+                                        <Icon name="trash-can-outline" size={14} color="#dc2626" />
+                                    </TouchableOpacity>
+                                </View>
 
-                        <View className="mb-2">
-                            <PickerButton
-                                label="Select day"
-                                value={scheduleDay.day}
-                                options={DAYS_OF_WEEK}
-                                onSelect={v => updateScheduleDay(dayIndex, 'day', v)}
-                            />
-                        </View>
-
-                        <View className="mb-2">
-                            <FormInput
-                                placeholder="Day notes..."
-                                value={scheduleDay.notes || ''}
-                                onChangeText={v => updateScheduleDay(dayIndex, 'notes', v)}
-                            />
-                        </View>
-
-                        {/* Exercises for this day */}
-                        <View className="flex-row items-center justify-between mb-2">
-                            <Text className="text-gray-500 text-xs font-semibold">Exercises</Text>
-                            <TouchableOpacity
-                                onPress={() => addExerciseToScheduleDay(dayIndex)}
-                                className="flex-row items-center">
-                                <Icon name="plus" size={14} color="#2563eb" />
-                                <Text className="text-blue-600 text-xs ml-0.5">Add</Text>
-                            </TouchableOpacity>
-                        </View>
-                        {(scheduleDay.exercises || []).map((exName, exIndex) => (
-                            <View key={exIndex} className="flex-row items-center gap-2 mb-2">
-                                <View className="flex-1">
-                                    <FormInput
-                                        placeholder="Exercise name"
-                                        value={exName}
-                                        onChangeText={v => updateScheduleExercise(dayIndex, exIndex, v)}
+                                {/* Day Selector */}
+                                <View className="mb-2.5">
+                                    <DropdownButton
+                                        value={scheduleDay.day}
+                                        placeholder="Select day"
+                                        onPress={() => setShowDayPicker({ visible: true, dayIndex })}
+                                        icon="calendar-today"
                                     />
                                 </View>
-                                <TouchableOpacity
-                                    onPress={() => removeScheduleExercise(dayIndex, exIndex)}
-                                    className="w-9 h-9 justify-center items-center">
-                                    <Icon name="close-circle-outline" size={18} color="#9ca3af" />
-                                </TouchableOpacity>
-                            </View>
-                        ))}
-                        {(scheduleDay.exercises || []).length === 0 && (
-                            <Text className="text-gray-300 text-xs text-center py-2">
-                                No exercises for this day
-                            </Text>
-                        )}
-                    </View>
-                ))}
-                {formData.schedule.length === 0 && (
-                    <View className="bg-white rounded-xl p-6 items-center border border-gray-100">
-                        <Icon name="calendar-blank" size={32} color="#d1d5db" />
-                        <Text className="text-gray-400 text-sm mt-2">
-                            No schedule added yet
-                        </Text>
-                    </View>
-                )}
 
-                {/* ─── Diet Recommendation ─── */}
-                <SectionTitle icon="food-apple-outline" title="Diet Recommendation" />
-                <View className="bg-white rounded-xl p-4 border border-gray-100" style={{ elevation: 1 }}>
-                    <View className="flex-row gap-2 mb-2">
+                                {/* Day Notes */}
+                                <View className="mb-2.5">
+                                    <TextInput
+                                        value={scheduleDay.notes || ''}
+                                        onChangeText={v => updateScheduleDay(dayIndex, 'notes', v)}
+                                        className="bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 text-xs"
+                                        placeholder="Day notes (optional)"
+                                        placeholderTextColor="#9ca3af"
+                                    />
+                                </View>
+
+                                {/* Exercises for this day */}
+                                <View className="flex-row items-center justify-between mb-2">
+                                    <Text className="text-gray-400 text-[10px] font-semibold uppercase tracking-wider">Exercises</Text>
+                                    <TouchableOpacity
+                                        onPress={() => addExerciseToScheduleDay(dayIndex)}
+                                        activeOpacity={0.7}
+                                        className="flex-row items-center bg-blue-50 px-2.5 py-1 rounded-full">
+                                        <Icon name="plus" size={12} color="#2563eb" />
+                                        <Text className="text-blue-600 text-[10px] font-bold ml-1">Add</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                {(scheduleDay.exercises || []).map((exName, exIndex) => (
+                                    <View key={exIndex} className="flex-row items-center mb-2" style={{ gap: 6 }}>
+                                        <View className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#f59e0b' }} />
+                                        <View className="flex-1">
+                                            <TextInput
+                                                value={exName}
+                                                onChangeText={v => updateScheduleExercise(dayIndex, exIndex, v)}
+                                                className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-900 text-xs font-medium"
+                                                placeholder="Exercise name"
+                                                placeholderTextColor="#9ca3af"
+                                            />
+                                        </View>
+                                        <TouchableOpacity
+                                            onPress={() => removeScheduleExercise(dayIndex, exIndex)}
+                                            className="w-7 h-7 bg-gray-100 rounded-lg justify-center items-center">
+                                            <Icon name="close" size={12} color="#9ca3af" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                                {(scheduleDay.exercises || []).length === 0 && (
+                                    <Text className="text-gray-300 text-xs text-center py-2 italic">
+                                        No exercises for this day
+                                    </Text>
+                                )}
+                            </View>
+                        ))
+                    ) : (
+                        <View className="items-center py-8 bg-gray-50 rounded-xl" style={{ borderWidth: 1, borderColor: '#f3f4f6', borderStyle: 'dashed' }}>
+                            <View className="w-16 h-16 rounded-full bg-white justify-center items-center mb-3" style={{ elevation: 2 }}>
+                                <Icon name="calendar-blank" size={28} color="#d1d5db" />
+                            </View>
+                            <Text className="text-gray-900 font-bold text-sm">No schedule added</Text>
+                            <Text className="text-gray-400 text-xs mt-1 text-center px-4">
+                                Tap "Add Day" to build the weekly schedule
+                            </Text>
+                        </View>
+                    )}
+                </SectionCard>
+
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── DIET RECOMMENDATION SECTION ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <SectionCard title="Diet Recommendation" icon="food-apple-outline" iconColor="#22c55e">
+                    <View className="flex-row mb-2.5" style={{ gap: 6 }}>
                         <View className="flex-1">
-                            <Text className="text-gray-500 text-xs mb-1">Calories (kcal)</Text>
-                            <FormInput
-                                placeholder="2000"
+                            <Text className="text-gray-400 text-[10px] mb-1 font-medium uppercase tracking-wider">Calories (kcal)</Text>
+                            <TextInput
                                 value={formData.dietRecommendation?.calories || ''}
                                 onChangeText={v => setFormData(prev => ({
                                     ...prev,
                                     dietRecommendation: { ...prev.dietRecommendation, calories: v },
                                 }))}
+                                className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 text-xs text-center font-medium"
+                                placeholder="2000"
+                                placeholderTextColor="#9ca3af"
                                 keyboardType="numeric"
                             />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-gray-500 text-xs mb-1">Protein (g)</Text>
-                            <FormInput
-                                placeholder="120"
+                            <Text className="text-gray-400 text-[10px] mb-1 font-medium uppercase tracking-wider">Protein (g)</Text>
+                            <TextInput
                                 value={formData.dietRecommendation?.protein || ''}
                                 onChangeText={v => setFormData(prev => ({
                                     ...prev,
                                     dietRecommendation: { ...prev.dietRecommendation, protein: v },
                                 }))}
+                                className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 text-xs text-center font-medium"
+                                placeholder="120"
+                                placeholderTextColor="#9ca3af"
                                 keyboardType="numeric"
                             />
                         </View>
                     </View>
-                    <View className="flex-row gap-2 mb-2">
+                    <View className="flex-row mb-2.5" style={{ gap: 6 }}>
                         <View className="flex-1">
-                            <Text className="text-gray-500 text-xs mb-1">Carbs (g)</Text>
-                            <FormInput
-                                placeholder="250"
+                            <Text className="text-gray-400 text-[10px] mb-1 font-medium uppercase tracking-wider">Carbs (g)</Text>
+                            <TextInput
                                 value={formData.dietRecommendation?.carbs || ''}
                                 onChangeText={v => setFormData(prev => ({
                                     ...prev,
                                     dietRecommendation: { ...prev.dietRecommendation, carbs: v },
                                 }))}
+                                className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 text-xs text-center font-medium"
+                                placeholder="250"
+                                placeholderTextColor="#9ca3af"
                                 keyboardType="numeric"
                             />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-gray-500 text-xs mb-1">Fat (g)</Text>
-                            <FormInput
-                                placeholder="60"
+                            <Text className="text-gray-400 text-[10px] mb-1 font-medium uppercase tracking-wider">Fat (g)</Text>
+                            <TextInput
                                 value={formData.dietRecommendation?.fat || ''}
                                 onChangeText={v => setFormData(prev => ({
                                     ...prev,
                                     dietRecommendation: { ...prev.dietRecommendation, fat: v },
                                 }))}
+                                className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 text-xs text-center font-medium"
+                                placeholder="60"
+                                placeholderTextColor="#9ca3af"
                                 keyboardType="numeric"
                             />
                         </View>
                     </View>
                     <View>
-                        <Text className="text-gray-500 text-xs mb-1">Diet Notes</Text>
-                        <FormInput
-                            placeholder="Additional diet notes..."
+                        <Text className="text-gray-400 text-[10px] mb-1 font-medium uppercase tracking-wider">Diet Notes</Text>
+                        <TextInput
                             value={formData.dietRecommendation?.notes || ''}
                             onChangeText={v => setFormData(prev => ({
                                 ...prev,
                                 dietRecommendation: { ...prev.dietRecommendation, notes: v },
                             }))}
+                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-sm"
+                            placeholder="Additional diet notes..."
+                            placeholderTextColor="#9ca3af"
                             multiline
                             numberOfLines={2}
+                            textAlignVertical="top"
+                            style={{ minHeight: 56, elevation: 1 }}
                         />
                     </View>
-                </View>
+                </SectionCard>
 
-                {/* ─── Special Considerations ─── */}
-                <SectionTitle icon="alert-circle-outline" title="Special Considerations" />
-                <TagInput
-                    tags={formData.specialConsiderations}
-                    onAdd={tag => updateField('specialConsiderations', [...formData.specialConsiderations, tag])}
-                    onRemove={idx => updateField('specialConsiderations', formData.specialConsiderations.filter((_, i) => i !== idx))}
-                    placeholder="Add a consideration..."
-                    color="amber"
-                />
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── SPECIAL CONSIDERATIONS SECTION ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <SectionCard title="Special Considerations" icon="alert-circle-outline" iconColor="#f59e0b">
+                    <TagInput
+                        tags={formData.specialConsiderations}
+                        onAdd={tag => updateField('specialConsiderations', [...formData.specialConsiderations, tag])}
+                        onRemove={idx => updateField('specialConsiderations', formData.specialConsiderations.filter((_, i) => i !== idx))}
+                        placeholder="Add a consideration..."
+                        color="amber"
+                        icon="alert-circle-outline"
+                    />
+                </SectionCard>
 
-                {/* ─── Info Box ─── */}
-                <View className="mt-5 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                    <View className="flex-row items-center mb-2">
-                        <Icon name="lightbulb-outline" size={18} color="#1e40af" />
-                        <Text className="text-blue-800 font-semibold text-sm ml-2">
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── INFO BOX ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <LinearGradient
+                    colors={['#eff6ff', '#dbeafe']}
+                    style={{ borderRadius: 16, padding: 14, borderWidth: 1, borderColor: '#bfdbfe', marginBottom: 16 }}>
+                    <View className="flex-row items-center mb-1.5">
+                        <View className="w-6 h-6 rounded-lg bg-blue-100 justify-center items-center mr-2">
+                            <Icon name="lightbulb-outline" size={12} color="#1e40af" />
+                        </View>
+                        <Text className="text-blue-800 font-bold text-xs">
                             Training Plan vs Session
                         </Text>
                     </View>
-                    <Text className="text-blue-700 text-xs leading-5">
-                        <Text className="font-bold">Training Plan</Text> = Long-term program/blueprint (8-12 weeks) — WHAT exercises to do over time. Like a doctor's prescription.{'\n'}
-                        <Text className="font-bold">Session</Text> = Single scheduled appointment — WHEN to actually do them (date, time, facility). Like a doctor's appointment.{'\n\n'}
-                        Create a Training Plan first, then create Sessions to schedule when the member will execute parts of the plan.
+                    <Text className="text-blue-700 text-[10px] leading-4 ml-8">
+                        <Text className="font-bold">Training Plan</Text> = Long-term program (8-12 weeks) — WHAT exercises to do.{'\n'}
+                        <Text className="font-bold">Session</Text> = Single scheduled appointment — WHEN to do them.{'\n'}
+                        💡 Create a Training Plan first, then create Sessions to schedule when the member will execute parts of the plan.
                     </Text>
+                </LinearGradient>
+
+                {/* ═══════════════════════════════════════════════ */}
+                {/* ─── ACTION BUTTONS ─── */}
+                {/* ═══════════════════════════════════════════════ */}
+                <View className="flex-row mb-8" style={{ gap: 8 }}>
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
+                        activeOpacity={0.7}
+                        className="flex-1"
+                        style={{
+                            borderRadius: 14,
+                            borderWidth: 1.5,
+                            borderColor: '#e5e7eb',
+                            paddingVertical: 14,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#fff',
+                        }}>
+                        <Icon name="close" size={18} color="#6b7280" />
+                        <Text className="text-gray-600 font-bold text-base ml-2">Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={handleSave}
+                        activeOpacity={0.8}
+                        className="flex-1">
+                        <LinearGradient
+                            colors={['#1e3a8a', '#3b82f6']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={{
+                                borderRadius: 14,
+                                paddingVertical: 14,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                            <Icon
+                                name={isEdit ? 'content-save' : 'plus-circle'}
+                                size={18}
+                                color="#fff"
+                            />
+                            <Text className="text-white font-bold text-base ml-2">
+                                {isEdit ? 'Save' : 'Create'}
+                            </Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
                 </View>
 
-                {/* ─── Save Button ─── */}
-                <TouchableOpacity
-                    onPress={handleSave}
-                    activeOpacity={0.8}
-                    className="mt-6 mb-4">
-                    <LinearGradient
-                        colors={['#1e3a8a', '#3b82f6']}
-                        className="rounded-xl py-4 flex-row items-center justify-center">
-                        <Icon name={isEdit ? 'content-save-outline' : 'plus-circle-outline'} size={20} color="#fff" />
-                        <Text className="text-white font-bold text-base ml-2">
-                            {isEdit ? 'Save Changes' : 'Create Training Plan'}
-                        </Text>
-                    </LinearGradient>
-                </TouchableOpacity>
+                {/* Bottom Spacing */}
+                <View className="h-6" />
             </ScrollView>
-        </KeyboardAvoidingView>
+
+            {/* ═══════════════════════════════════════════════ */}
+            {/* ─── PICKER MODALS ─── */}
+            {/* ═══════════════════════════════════════════════ */}
+
+            {/* Member Picker */}
+            <PickerModal
+                visible={showMemberPicker}
+                onClose={() => setShowMemberPicker(false)}
+                title="Select Member"
+                data={memberOptions}
+                selectedValue={formData.memberId}
+                onSelect={handleMemberSelect}
+                renderLabel={(item) => item.label}
+            />
+
+            {/* Sport Picker */}
+            <PickerModal
+                visible={showSportPicker}
+                onClose={() => setShowSportPicker(false)}
+                title="Select Sport"
+                data={sportOptions}
+                selectedValue={formData.sport}
+                onSelect={(item) => updateField('sport', item.value)}
+                renderLabel={(item) => item.label}
+            />
+
+            {/* Difficulty Picker */}
+            <PickerModal
+                visible={showDifficultyPicker}
+                onClose={() => setShowDifficultyPicker(false)}
+                title="Select Difficulty"
+                data={difficultyOptions}
+                selectedValue={formData.difficulty}
+                onSelect={(item) => updateField('difficulty', item.value)}
+                renderLabel={(item) => item.label}
+            />
+
+            {/* Status Picker */}
+            <PickerModal
+                visible={showStatusPicker}
+                onClose={() => setShowStatusPicker(false)}
+                title="Select Status"
+                data={statusOptions}
+                selectedValue={formData.status}
+                onSelect={(item) => updateField('status', item.value)}
+                renderLabel={(item) => item.label}
+            />
+
+            {/* Day Picker */}
+            <PickerModal
+                visible={showDayPicker.visible}
+                onClose={() => setShowDayPicker({ visible: false, dayIndex: -1 })}
+                title="Select Day"
+                data={dayOptions}
+                selectedValue={showDayPicker.dayIndex >= 0 ? formData.schedule[showDayPicker.dayIndex]?.day : ''}
+                onSelect={(item) => {
+                    if (showDayPicker.dayIndex >= 0) {
+                        updateScheduleDay(showDayPicker.dayIndex, 'day', item.value);
+                    }
+                }}
+                renderLabel={(item) => item.label}
+            />
+        </View>
     );
 };
 
